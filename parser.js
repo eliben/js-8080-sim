@@ -3,6 +3,8 @@
 // TODO: separate ops for directives/identifiers? Or just accept .org / org
 // similarly
 
+// TODO: keep track of line numbers in "pos" attached to tokens
+
 // Support db directive to put bytes in memory. Should work with strings too
 
 // Lexer for 8080 assembly.
@@ -150,6 +152,8 @@ class Lexer {
 }
 
 let s = `
+; head comment
+
 mov foo[doo], 20 ; blob comment
 org: pop a
 
@@ -158,15 +162,15 @@ db 'hello'
 db 'a'
 `;
 
-let l = new Lexer([...s]);
+//let l = new Lexer([...s]);
 
-while (true) {
-  let tok = l.token();
-  if (tok === null) {
-    break;
-  }
-  console.log(tok);
-}
+//while (true) {
+  //let tok = l.token();
+  //if (tok === null) {
+    //break;
+  //}
+  //console.log(tok);
+//}
 
 class Parser {
   constructor() {
@@ -174,8 +178,27 @@ class Parser {
 
   // Parse string s and return an array of objects, one per line.
   parse(s) {
+    let result = [];
+    let lexer = new Lexer([...s]);
+
+    let curTok = lexer.token();
+    
+    // Skip empty lines.
+    while (curTok !== null && curTok.name === 'NEWLINE') {
+      curTok = lexer.token();
+    }
+
+    if (curTok === null) {
+      return;
+    }
+
+    // Here curTok is the first token of an actual line.
+    console.log(curTok);
   }
 }
+
+let p = new Parser();
+p.parse(s);
 
 // TODO: schema for parser:
 // array of {label:, instruction:, arguments: []}
