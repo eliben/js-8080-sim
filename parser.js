@@ -29,6 +29,8 @@ class Lexer {
     } else {
       if (this._isAlpha(c)) {
         return this._identifier();
+      } else if (this._isDigit(c)) {
+        return this._number();
       } else {
         throw new Error(`Token error at ${this.pos}`);
       }
@@ -43,6 +45,21 @@ class Lexer {
 
     var tok = {
       name: 'IDENTIFIER',
+      value: this.buf.slice(this.pos, endpos).join(''),
+      pos: this.pos
+    }
+    this.pos = endpos;
+    return tok;
+  }
+
+  _number() {
+    var endpos = this.pos + 1;
+    while (endpos < this.buf.length && this._isDigit(this.buf[endpos])) {
+      endpos++;
+    }
+
+    var tok = {
+      name: 'NUMBER',
       value: this.buf.slice(this.pos, endpos).join(''),
       pos: this.pos
     }
@@ -79,6 +96,10 @@ class Lexer {
            c === '_' || c === '$';
   }
 
+  _isDigit = function(c) {
+    return (c >= '0' && c <= '9');
+  }
+
   _isAlphaNum = function(c) {
     return (c >= 'a' && c <= 'z') ||
            (c >= 'A' && c <= 'Z') ||
@@ -87,7 +108,7 @@ class Lexer {
   }
 }
 
-let s = "mov foo[doo]";
+let s = "mov foo[doo], 20";
 let l = new Lexer([...s]);
 
 while (true) {
