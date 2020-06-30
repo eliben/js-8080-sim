@@ -3,6 +3,8 @@
 Links:
 
 * https://pastraiser.com/cpu/i8080/i8080_opcodes.html
+* 8080 by opcode:
+  http://www.emulator101.com/reference/8080-by-opcode.html 
 * Online assembler with "live" assmelby:
   https://svofski.github.io/pretty-8080-assembler/
 * Online assembler: https://www.asm80.com/onepage/asm8080.html 
@@ -25,4 +27,28 @@ loop:       ldax    d           ;Load A from the address pointed by DE
             ora     c           ;A = A | C      (set zero)
             jnz     loop        ;Jump to 'loop:' if the zero-flag is not set.   
             ret                 ;Return
+```
+
+Sample code from the code book:
+
+```
+Multiply:   push psw            ; save registers
+            push bc
+
+            sub h,h             ; set hl (result) to 0
+            sub l,l
+
+            mov a,b             ; the multiplier goes in a
+            cpi a, 00h          ; if it's 0, we're finished
+            jz AllDone
+
+            mvi b,00h
+
+MultLoop:   dad hl,bc
+            dec a
+            jnz MultLoop
+
+AllDone:    pop bc
+            pop psw
+            ret 
 ```

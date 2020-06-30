@@ -1,6 +1,9 @@
 'use strict';
 
-// TODO: separate ops for directives/identifiers?
+// TODO: separate ops for directives/identifiers? Or just accept .org / org
+// similarly
+
+// Support db directive to put bytes in memory. Should work with strings too
 
 // Lexer for 8080 assembly.
 // Usage: create it given the input as an array of chars. Then repeatedly
@@ -13,8 +16,9 @@
 //   pos: <token position in the buffer>
 // }
 //
-// Possible token names: LABEL, ID, <ops>
+// Possible token names: LABEL, ID, <ops>, STRING
 // For ops, name and value are the same, e.g. {name: '[', value: ']', pos: ...}
+// For STRING, the value's quotes are stripped
 //
 // IDs are returned for everythin alphanumeric, including numbers. Numbers
 // can be hex - difficult to distinguish from IDs otherwise (e.g. "fah" could
@@ -46,6 +50,8 @@ class Lexer {
     } else {
       if (this._isAlphaNum(c)) {
         return this._id();
+      } else if (c === "'") {
+        return this._string();
       } else {
         throw new Error(`Token error at ${this.pos}`);
       }
@@ -72,9 +78,26 @@ class Lexer {
         name: 'ID',
         value: this.buf.slice(this.pos, endpos).join(''),
         pos: this.pos
-      }
+      };
       this.pos = endpos;
       return tok;
+    }
+  }
+
+  _string() {
+    // this.pos points to the opening quote; find the ending quote.
+    let end = this.buf.indexOf("'", this.pos + 1);
+
+    if (end < 0) {
+      throw new Error(`unterminated quote at ${this.pos}`);
+    } else {
+      var tok = {
+        name: "STRING",
+        value: this.buf.slice(this.pos + 1, end),
+        pos: this.pos
+      };
+      this.pos = end + 1;
+      return tok
     }
   }
 
@@ -112,6 +135,8 @@ class Lexer {
 let s = `
 mov foo[doo], 20
 org: pop a
+db 'hello'
+db 'a'
 `;
 
 let l = new Lexer([...s]);
