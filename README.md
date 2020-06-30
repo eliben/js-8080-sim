@@ -3,6 +3,8 @@
 Links:
 
 * https://pastraiser.com/cpu/i8080/i8080_opcodes.html
+* Online assembler with "live" assmelby:
+  https://svofski.github.io/pretty-8080-assembler/
 * Online assembler: https://www.asm80.com/onepage/asm8080.html 
 * Instruction encoding: http://www.classiccmp.org/dunfield/r/8080.txt
 
