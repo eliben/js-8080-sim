@@ -154,8 +154,9 @@ class Lexer {
 
 let s = `
 ; head comment
+standalone:
 
-mov foo[doo], 20 ; blob comment
+mov foo, 20 ; blob comment
 org: pop a
 
 ; full line comment
@@ -191,7 +192,7 @@ class Parser {
       }
 
       if (curTok === null) {
-        return;
+        return result;
       }
 
       // Here curTok is the first token of an actual line.
@@ -224,17 +225,30 @@ class Parser {
       // Arguments are optional, and we accept any number; allow a sequence
       // of arguments separated by ',' tokens.
       while (curTok !== null && curTok.name !== 'NEWLINE') {
-        if (curTok.name === 'ID') {
-          // TODO: continue
-          //args.push(
+        if (curTok.name === 'ID' || curTok.name === 'STRING') {
+          args.push(curTok.value);
+        } else {
+          throw new Error(`want arg at pos=${curTok.pos}; got ${curTok.value}`);
+        }
+        curTok = lexer.token();
+        if (curTok !== null && curTok.name === ',') {
+          curTok = lexer.token();
         }
       }
+
+      result.push({
+        label: labelTok === null ? null : labelTok.value,
+        instr: idTok.value,
+        args: args,
+        pos: idTok.pos});
     }
   }
 }
 
 let p = new Parser();
-p.parse(s);
+let res = p.parse(s);
+
+console.log(res);
 
 // TODO: schema for parser:
 // array of {label:, instr:, args: [], pos: ...}
