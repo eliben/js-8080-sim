@@ -2,6 +2,20 @@
 
 // TODO: separate ops for directives/identifiers?
 
+// Lexer for 8080 assembly.
+// Usage: create it given the input as an array of chars. Then repeatedly
+// call token() until it returns null.
+//
+// token() returns objects with:
+// {
+//   name: <token name>,
+//   value: <raw token value from the input buffer, as a string>,
+//   pos: <token position in the buffer>
+// }
+//
+// Possible token names: LABEL, ID, <ops>
+// For ops, name and value are the same, e.g. {name: '[', value: ']', pos: ...}
+//
 // IDs are returned for everythin alphanumeric, including numbers. Numbers
 // can be hex - difficult to distinguish from IDs otherwise (e.g. "fah" could
 // theoretically be a hex number "fa").
@@ -111,3 +125,6 @@ while (true) {
 }
 
 
+// TODO: schema for parser:
+// array of {label:, instruction:, arguments: []}
+// use the same schema for directives?
