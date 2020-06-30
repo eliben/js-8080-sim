@@ -22,7 +22,7 @@
 // For ops, name and value are the same, e.g. {name: '[', value: ']', pos: ...}
 // For STRING, the value's quotes are stripped
 //
-// IDs are returned for everythin alphanumeric, including numbers. Numbers
+// IDs are returned for everything alphanumeric, including numbers. Numbers
 // can be hex - difficult to distinguish from IDs otherwise (e.g. "fah" could
 // theoretically be a hex number "fa").
 class Lexer {
@@ -34,7 +34,8 @@ class Lexer {
     this._ops = new Set([':', ',', '.', '[', ']']);
   }
 
-  // Get the next token.
+  // Get the next token. Returns objects as described in the class comment; at
+  // end of input, returns null every time it's called.
   token() {
     this._skipNonTokens();
     if (this.pos >= this.buf.length) {
@@ -181,19 +182,54 @@ class Parser {
     let result = [];
     let lexer = new Lexer([...s]);
 
-    let curTok = lexer.token();
-    
-    // Skip empty lines.
-    while (curTok !== null && curTok.name === 'NEWLINE') {
+    while (true) {
+      let curTok = lexer.token();
+      
+      // Skip empty lines.
+      while (curTok !== null && curTok.name === 'NEWLINE') {
+        curTok = lexer.token();
+      }
+
+      if (curTok === null) {
+        return;
+      }
+
+      // Here curTok is the first token of an actual line.
+
+      // Figure out whether there's a label.
+      let labelTok = null;
+      if (curTok.name === 'LABEL') {
+        labelTok = curTok;
+        curTok = lexer.token();
+      }
+
+      // A standalone label is OK, we add it to result and continue to the next
+      // line.
+      if (curTok === null || curTok.name == 'NEWLINE') {
+        result.push({
+          label: labelTok.value, instr: null, args: [], pos: labelTok.pos});
+        continue;
+      }
+
+      // ... there's more in the line; expect an instruction.
+      if (curTok.name !== 'ID') {
+        throw new Error(`want ID at pos=${curTok.pos}; got ${curTok.value}`);
+      }
+
+      let idTok = curTok;
+      let args = [];
+
       curTok = lexer.token();
-    }
 
-    if (curTok === null) {
-      return;
+      // Arguments are optional, and we accept any number; allow a sequence
+      // of arguments separated by ',' tokens.
+      while (curTok !== null && curTok.name !== 'NEWLINE') {
+        if (curTok.name === 'ID') {
+          // TODO: continue
+          //args.push(
+        }
+      }
     }
-
-    // Here curTok is the first token of an actual line.
-    console.log(curTok);
   }
 }
 
@@ -201,6 +237,6 @@ let p = new Parser();
 p.parse(s);
 
 // TODO: schema for parser:
-// array of {label:, instruction:, arguments: []}
+// array of {label:, instr:, args: [], pos: ...}
 // label can be null
 // use the same schema for directives?
