@@ -16,7 +16,7 @@
 //   pos: <token position in the buffer>
 // }
 //
-// Possible token names: LABEL, ID, <ops>, STRING
+// Possible token names: LABEL, ID, <ops>, STRING, NEWLINE.
 // For ops, name and value are the same, e.g. {name: '[', value: ']', pos: ...}
 // For STRING, the value's quotes are stripped
 //
@@ -39,9 +39,15 @@ class Lexer {
       return null;
     }
 
-    let c = this.buf[this.pos];
-    if (c === ';') {
+    if (this.buf[this.pos] === ';') {
       this._skipComment();
+    }
+
+    let c = this.buf[this.pos];
+    if (this._isNewline(c)) {
+      let tok = {name: 'NEWLINE', value: c, pos: this.pos};
+      this._skipNewlines();
+      return tok;
     }
 
     if (this._ops.has(c)) {
@@ -104,7 +110,7 @@ class Lexer {
   _skipNonTokens() {
     while (this.pos < this.buf.length) {
       let c = this.buf[this.pos];
-      if (c === ' ' || c === '\t' || this._isNewline(c)) {
+      if (c === ' ' || c === '\t') {
         this.pos++;
       } else {
         break;
@@ -117,11 +123,22 @@ class Lexer {
     while (endpos < this.buf.length && !this._isNewline(this.buf[endpos])) {
       endpos++;
     }
-    this._skipNonTokens();
+    this.pos = endpos;
   }
 
   _isNewline(c) {
     return c === '\r' || c === '\n';
+  }
+
+  _skipNewlines() {
+    while (this.pos < this.buf.length) {
+      let c = this.buf[this.pos];
+      if (this._isNewline(c)) {
+        this.pos++;
+      } else {
+        break;
+      }
+    }
   }
 
   _isAlphaNum = function(c) {
@@ -133,8 +150,10 @@ class Lexer {
 }
 
 let s = `
-mov foo[doo], 20
+mov foo[doo], 20 ; blob comment
 org: pop a
+
+; full line comment
 db 'hello'
 db 'a'
 `;
@@ -149,7 +168,16 @@ while (true) {
   console.log(tok);
 }
 
+class Parser {
+  constructor() {
+  }
+
+  // Parse string s and return an array of objects, one per line.
+  parse(s) {
+  }
+}
 
 // TODO: schema for parser:
 // array of {label:, instruction:, arguments: []}
+// label can be null
 // use the same schema for directives?
