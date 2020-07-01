@@ -1,8 +1,5 @@
 'use strict';
 
-// TODO: separate ops for directives/identifiers? Or just accept .org / org
-// similarly
-
 // Support db directive to put bytes in memory. Should work with strings too
 
 // Lexer for 8080 assembly.
@@ -20,9 +17,9 @@
 // For ops, name and value are the same, e.g. {name: '[', value: ']', pos: ...}
 // For STRING, the value's quotes are stripped
 //
-// IDs are returned for everything alphanumeric, including numbers. Numbers
-// can be hex - difficult to distinguish from IDs otherwise (e.g. "fah" could
-// theoretically be a hex number "fa").
+// IDs are returned for everything alphanumeric, including directives (starting
+// with a '.') and numbers. Numbers can be hex - difficult to distinguish from
+// IDs otherwise (e.g. "fah" could theoretically be a hex number "fa").
 class Lexer {
   // buf should be an array of chars
   constructor(buf) {
@@ -34,7 +31,7 @@ class Lexer {
     this.lineCount = 1;
     this.lastNewlinePos = 0;
 
-    this._ops = new Set([':', ',', '.', '[', ']']);
+    this._ops = new Set([':', ',', '[', ']']);
   }
 
   // Get the next token. Returns objects as described in the class comment; at
@@ -155,7 +152,7 @@ class Lexer {
     return (c >= 'a' && c <= 'z') ||
            (c >= 'A' && c <= 'Z') ||
            (c >= '0' && c <= '9') ||
-           c === '_' || c === '$';
+           c === '.' || c === '_' || c === '$';
   }
 
   _lineCol(pos) {
@@ -215,7 +212,16 @@ class Parser {
   constructor() {
   }
 
-  // Parse string s and return an array of objects, one per line.
+  // Parse string s and return an array of "source line" objects. Each source
+  // line has:
+  // {
+  //  label: <optional label, null if none>,
+  //  instr: <optional instruction, null if none>,
+  //  args: <array of args>
+  // }
+  //
+  // There can be standalone labels (w/o an instruction), and instructions w/o
+  // labels. There can be no arguments without an instruction.
   parse(s) {
     let result = [];
     let lexer = new Lexer([...s]);
@@ -251,7 +257,7 @@ class Parser {
 
       // ... there's more in the line; expect an instruction.
       if (curTok.name !== 'ID') {
-        throw new Error(`want ID at pos=${curTok.pos}; got ${curTok.value}`);
+        throw new Error(`want ID at ${this._showPos(curTok.pos)}; got ${curTok.value}`);
       }
 
       let idTok = curTok;
@@ -280,7 +286,14 @@ class Parser {
         pos: idTok.pos});
     }
   }
+  
+  _showPos(pos) {
+    return `${pos.line}:${pos.col}`;
+  }
 }
+
+// Exports.
+module.exports.Parser = Parser;
 
 let p = new Parser();
 let res = p.parse(s2);
@@ -289,8 +302,3 @@ for (let r of res) {
   console.log(JSON.stringify(r, null, 2));
 }
 //console.log(res);
-
-// TODO: schema for parser:
-// array of {label:, instr:, args: [], pos: ...}
-// label can be null
-// use the same schema for directives?
