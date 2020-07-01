@@ -3,8 +3,6 @@
 // TODO: separate ops for directives/identifiers? Or just accept .org / org
 // similarly
 
-// TODO: keep track of line numbers in "pos" attached to tokens
-
 // Support db directive to put bytes in memory. Should work with strings too
 
 // Lexer for 8080 assembly.
@@ -31,6 +29,11 @@ class Lexer {
     this.pos = 0;
     this.buf = buf;
 
+    // These state variables are used to keep track of the line and column
+    // of tokens.
+    this.lineCount = 1;
+    this.lastNewlinePos = 0;
+
     this._ops = new Set([':', ',', '.', '[', ']']);
   }
 
@@ -48,14 +51,16 @@ class Lexer {
 
     let c = this.buf[this.pos];
     if (this._isNewline(c)) {
-      let tok = {name: 'NEWLINE', value: c, pos: this.pos};
+      let tok = {name: 'NEWLINE', value: c, pos: this._lineCol(this.pos)};
       this._skipNewlines();
       return tok;
     }
 
     if (this._ops.has(c)) {
       // Known operator.
-      return {name: c, value: c, pos: this.pos++};
+      let tok = {name: c, value: c, pos: this._lineCol(this.pos)};
+      this.pos++;
+      return tok;
     } else {
       if (this._isAlphaNum(c)) {
         return this._id();
@@ -78,7 +83,7 @@ class Lexer {
       let tok = {
         name: 'LABEL',
         value: this.buf.slice(this.pos, endpos).join(''),
-        pos: this.pos
+        pos: this._lineCol(this.pos)
       }
       this.pos = endpos + 1;
       return tok;
@@ -86,7 +91,7 @@ class Lexer {
       let tok = {
         name: 'ID',
         value: this.buf.slice(this.pos, endpos).join(''),
-        pos: this.pos
+        pos: this._lineCol(this.pos)
       };
       this.pos = endpos;
       return tok;
@@ -103,7 +108,7 @@ class Lexer {
       var tok = {
         name: "STRING",
         value: this.buf.slice(this.pos + 1, end),
-        pos: this.pos
+        pos: this._lineCol(this.pos)
       };
       this.pos = end + 1;
       return tok
@@ -137,6 +142,8 @@ class Lexer {
     while (this.pos < this.buf.length) {
       let c = this.buf[this.pos];
       if (this._isNewline(c)) {
+        this.lineCount++;
+        this.lastNewlinePos = this.pos;
         this.pos++;
       } else {
         break;
@@ -150,6 +157,10 @@ class Lexer {
            (c >= '0' && c <= '9') ||
            c === '_' || c === '$';
   }
+
+  _lineCol(pos) {
+    return {line: this.lineCount, col: pos - this.lastNewlinePos};
+  }
 }
 
 let s = `
@@ -157,7 +168,7 @@ let s = `
 standalone:
 
 mov foo, 20 ; blob comment
-org: pop a
+  org: pop a
 
 ; full line comment
 db 'hello'
