@@ -1,6 +1,7 @@
 'use strict';
 
-// Support db directive to put bytes in memory. Should work with strings too
+// TODO: clean up this file from all the printouts and code samples -- move them
+// elsewhere.
 
 // Lexer for 8080 assembly.
 // Usage: create it given the input as an array of chars. Then repeatedly
@@ -156,56 +157,20 @@ class Lexer {
   }
 
   _lineCol(pos) {
-    return {line: this.lineCount, col: pos - this.lastNewlinePos};
+    return new Position(this.lineCount, pos - this.lastNewlinePos);
   }
 }
 
-let s = `
-; head comment
-standalone:
+class Position {
+  constructor(line, col) {
+    this.line = line;
+    this.col = col;
+  }
 
-mov foo, 20 ; blob comment
-  org: pop a
-
-  dlb
-  dad 1, foo, 'str', 98h
-
-; full line comment
-db 'hello'
-db 'a'
-`;
-
-let s2 = `
-Multiply:   push psw            ; save registers
-            push bc
-
-            mvi h, 00h
-            mvi l, 00h
-
-            mov a,b             ; the multiplier goes in a
-            cpi 00h          ; if it's 0, we're finished
-            jz AllDone
-
-            mvi b,00h
-
-MultLoop:   dad bc
-            dcr a
-            jnz MultLoop
-
-AllDone:    pop bc
-            psw
-            ret
-`;
-
-//let l = new Lexer([...s]);
-
-//while (true) {
-  //let tok = l.token();
-  //if (tok === null) {
-    //break;
-  //}
-  //console.log(tok);
-//}
+  toString() {
+    return `${this.line}:${this.col}`;
+  }
+}
 
 class Parser {
   constructor() {
@@ -287,17 +252,61 @@ class Parser {
   }
   
   _parseError(pos, msg) {
-    throw new Error(`Parse error at ${this._showPos(pos)}: ${msg}`);
-  }
-
-  _showPos(pos) {
-    return `${pos.line}:${pos.col}`;
+    throw new Error(`Parse error at ${pos}: ${msg}`);
   }
 }
 
 // Exports.
 module.exports.Parser = Parser;
 
+// --------------------------------------------- < REMOVE THIS
+
+let s = `
+; head comment
+standalone:
+
+mov foo, 20 ; blob comment
+  org: pop a
+
+  dlb
+  dad 1, foo, 'str', 98h
+
+; full line comment
+db 'hello'
+db 'a'
+`;
+
+let s2 = `
+Multiply:   push psw            ; save registers
+            push bc
+
+            mvi h, 00h
+            mvi l, 00h
+
+            mov a,b             ; the multiplier goes in a
+            cpi 00h          ; if it's 0, we're finished
+            jz AllDone
+
+            mvi b,00h
+
+MultLoop:   dad bc
+            dcr a
+            jnz MultLoop
+
+AllDone:    pop  bc
+            psw
+            ret
+`;
+
+//let l = new Lexer([...s]);
+
+//while (true) {
+  //let tok = l.token();
+  //if (tok === null) {
+    //break;
+  //}
+  //console.log(tok);
+//}
 let p = new Parser();
 let res = p.parse(s2);
 
@@ -305,3 +314,4 @@ for (let r of res) {
   console.log(JSON.stringify(r, null, 2));
 }
 //console.log(res);
+
