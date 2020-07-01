@@ -193,7 +193,7 @@ MultLoop:   dad hl,bc
             jnz MultLoop
 
 AllDone:    pop bc
-            pop psw
+            psw
             ret
 
 `;
@@ -257,7 +257,7 @@ class Parser {
 
       // ... there's more in the line; expect an instruction.
       if (curTok.name !== 'ID') {
-        throw new Error(`want ID at ${this._showPos(curTok.pos)}; got ${curTok.value}`);
+        this._parseError(curTok.pos, `want ID; got "${curTok.value}"`);
       }
 
       let idTok = curTok;
@@ -271,7 +271,7 @@ class Parser {
         if (curTok.name === 'ID' || curTok.name === 'STRING') {
           args.push(curTok.value);
         } else {
-          throw new Error(`want arg at pos=${curTok.pos}; got ${curTok.value}`);
+          this._parseError(curTok.pos, `want arg; got "${curTok.value}"`);
         }
         curTok = lexer.token();
         if (curTok !== null && curTok.name === ',') {
@@ -287,6 +287,10 @@ class Parser {
     }
   }
   
+  _parseError(pos, msg) {
+    throw new Error(`Parse error at ${this._showPos(pos)}: ${msg}`);
+  }
+
   _showPos(pos) {
     return `${pos.line}:${pos.col}`;
   }
