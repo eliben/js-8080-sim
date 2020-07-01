@@ -170,9 +170,35 @@ standalone:
 mov foo, 20 ; blob comment
   org: pop a
 
+  dlb
+  dad 1, foo, 'str', 98h
+
 ; full line comment
 db 'hello'
 db 'a'
+`;
+
+let s2 = `
+Multiply:   push psw            ; save registers
+            push bc
+
+            sub h,h             ; set hl (result) to 0
+            sub l,l
+
+            mov a,b             ; the multiplier goes in a
+            cpi a, 00h          ; if it's 0, we're finished
+            jz AllDone
+
+            mvi b,00h
+
+MultLoop:   dad hl,bc
+            dec a
+            jnz MultLoop
+
+AllDone:    pop bc
+            pop psw
+            ret
+
 `;
 
 //let l = new Lexer([...s]);
@@ -257,9 +283,12 @@ class Parser {
 }
 
 let p = new Parser();
-let res = p.parse(s);
+let res = p.parse(s2);
 
-console.log(res);
+for (let r of res) {
+  console.log(JSON.stringify(r, null, 2));
+}
+//console.log(res);
 
 // TODO: schema for parser:
 // array of {label:, instr:, args: [], pos: ...}
