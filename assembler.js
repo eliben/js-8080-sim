@@ -30,6 +30,8 @@ class Assembler {
     // these labels are requested. This is filled up during assembly when we
     // encounter refereces to labels. In the fixup stage these are applied to
     // the proper places in the final memory map.
+    // TODO: this can also help detect labels that were referenced but never
+    // defined
     this.labelToFixups = new Map();
   }
 
@@ -47,13 +49,26 @@ class Assembler {
     for (let sl of sourceLines) {
       if (sl.label !== null) {
         if (this.labelToAddr.has(sl.label)) {
-          //this._assemblyError(
+          this._assemblyError(sl.pos, `duplicate label "${sl.label}"`);
         }
+
+        this.labelToAddr.set(sl.label, curAddr);
+      }
+
+      // Instruction encoding here.
+      if (sl.instr !== null) {
+        let encoded = this._encodeInstruction(sl.instr, sl.args, curAddr);
       }
     }
   }
 
   _applyFixups() {
+  }
+
+  // Encodes the instruction 'instr' with its 'args' into an array of numbers,
+  // and returns the array. curAddr is passed in so this method could update
+  // the labelsToFixups field when it encounters label references.
+  _encodeInstruction(instr, args, curAddr) {
   }
 
   _assemblyError(pos, msg) {
