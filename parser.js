@@ -179,23 +179,22 @@ let s2 = `
 Multiply:   push psw            ; save registers
             push bc
 
-            sub h,h             ; set hl (result) to 0
-            sub l,l
+            mvi h, 00h
+            mvi l, 00h
 
             mov a,b             ; the multiplier goes in a
-            cpi a, 00h          ; if it's 0, we're finished
+            cpi 00h          ; if it's 0, we're finished
             jz AllDone
 
             mvi b,00h
 
-MultLoop:   dad hl,bc
-            dec a
+MultLoop:   dad bc
+            dcr a
             jnz MultLoop
 
 AllDone:    pop bc
             psw
             ret
-
 `;
 
 //let l = new Lexer([...s]);

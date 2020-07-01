@@ -28,27 +28,3 @@ loop:       ldax    d           ;Load A from the address pointed by DE
             jnz     loop        ;Jump to 'loop:' if the zero-flag is not set.   
             ret                 ;Return
 ```
-
-Sample code from the code book:
-
-```
-Multiply:   push psw            ; save registers
-            push bc
-
-            sub h,h             ; set hl (result) to 0
-            sub l,l
-
-            mov a,b             ; the multiplier goes in a
-            cpi a, 00h          ; if it's 0, we're finished
-            jz AllDone
-
-            mvi b,00h
-
-MultLoop:   dad hl,bc
-            dec a
-            jnz MultLoop
-
-AllDone:    pop bc
-            pop psw
-            ret 
-```
