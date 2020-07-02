@@ -2,12 +2,9 @@
 
 const {Parser} = require('./parser.js');
 
-let p = new Parser();
-let res = p.parse(`foobar\n`);
-
-for (let r of res) {
-  console.log(JSON.stringify(r, null, 2));
-}
+//for (let r of res) {
+  //console.log(JSON.stringify(r, null, 2));
+//}
 
 // TODO: should produce a raw memory map with assembled code, array of memory
 // essentially (64 KiB?)
@@ -57,7 +54,7 @@ class Assembler {
 
       // Instruction encoding here.
       if (sl.instr !== null) {
-        let encoded = this._encodeInstruction(sl.instr, sl.args, curAddr);
+        let encoded = this._encodeInstruction(sl, curAddr);
       }
     }
   }
@@ -65,13 +62,55 @@ class Assembler {
   _applyFixups() {
   }
 
-  // Encodes the instruction 'instr' with its 'args' into an array of numbers,
+  // Encodes the instruction in source line sl into an array of numbers,
   // and returns the array. curAddr is passed in so this method could update
   // the labelsToFixups field when it encounters label references.
-  _encodeInstruction(instr, args, curAddr) {
+  _encodeInstruction(sl, curAddr) {
+    console.log('assembling', JSON.stringify(sl));
+    switch(sl.instr) {
+      case 'PUSH':
+        break;
+      default:
+        this._assemblyError(sl.pos, `unknown instruction ${sl.instr}`);
+    }
+    return 1;
   }
 
   _assemblyError(pos, msg) {
     throw new Error(`Assembly error at ${pos}: ${msg}`);
   }
 }
+
+let p = new Parser();
+
+let mult = `
+; multiplies b by c, puts result in hl
+
+Multiply:   push psw            ; save registers
+            push bc
+
+            mvi h, 00h
+            mvi l, 00h
+
+            mov a,b          ; the multiplier goes in a
+            cpi 00h          ; if it's 0, we're finished
+            jz AllDone
+
+            mvi b,00h
+
+MultLoop:   dad bc
+            dcr a
+            jnz MultLoop
+
+AllDone:    pop  bc
+            psw
+            ret
+`;
+
+console.log('-------------------------------------');
+
+let sl = p.parse(mult);
+
+let asm = new Assembler();
+let mem = asm.assemble(sl);
+

@@ -181,7 +181,8 @@ class Parser {
   // {
   //  label: <optional label, null if none>,
   //  instr: <optional instruction, null if none>,
-  //  args: <array of args>
+  //  args: <array of args>,
+  //  pos: Position
   // }
   //
   // There can be standalone labels (w/o an instruction), and instructions w/o
@@ -277,13 +278,15 @@ db 'a'
 `;
 
 let s2 = `
+; multiplies b by c, puts result in hl
+
 Multiply:   push psw            ; save registers
             push bc
 
             mvi h, 00h
             mvi l, 00h
 
-            mov a,b             ; the multiplier goes in a
+            mov a,b          ; the multiplier goes in a
             cpi 00h          ; if it's 0, we're finished
             jz AllDone
 
