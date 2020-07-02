@@ -55,6 +55,7 @@ class Assembler {
       // Instruction encoding here.
       if (sl.instr !== null) {
         let encoded = this._encodeInstruction(sl, curAddr);
+        console.log(encoded.map((e) => e.toString(16)));
       }
     }
   }
@@ -65,15 +66,40 @@ class Assembler {
   // Encodes the instruction in source line sl into an array of numbers,
   // and returns the array. curAddr is passed in so this method could update
   // the labelsToFixups field when it encounters label references.
+  // Follows encodings in http://www.classiccmp.org/dunfield/r/8080.txt
   _encodeInstruction(sl, curAddr) {
     console.log('assembling', JSON.stringify(sl));
-    switch(sl.instr) {
-      case 'PUSH':
+    switch (sl.instr.toLowerCase()) {
+      case 'push':
+        let rp = this._expectOneRegisterPairArg(sl);
+        let enc = 0b11000101 | (rp << 4);
+        return [enc];
         break;
       default:
         this._assemblyError(sl.pos, `unknown instruction ${sl.instr}`);
     }
     return 1;
+  }
+
+  // Expect sl to have a single register pair argument and returns its encoding.
+  _expectOneRegisterPairArg(sl) {
+    if (sl.args.length != 1) {
+      this._assemblyError(sl.pos, `want one RP arg for ${sl.instr}; got ${sl.args.length}`);
+    }
+    let arg = sl.args[0];
+    switch (arg.toLowerCase()) {
+      case 'bc':
+        return 0b00;
+      case 'de':
+        return 0b01;
+      case 'hl':
+        return 0b10;
+      case 'sp':
+      case 'psw':
+        return 0b11;
+      default:
+        this._assemblyError(sl.pos, `invalid register pair ${arg}`);
+    }
   }
 
   _assemblyError(pos, msg) {
