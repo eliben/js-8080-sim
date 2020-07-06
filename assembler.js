@@ -55,6 +55,9 @@ class Assembler {
       // Instruction encoding here.
       if (sl.instr !== null) {
         let encoded = this._encodeInstruction(sl, curAddr);
+        for (let i = 0; i < encoded.length; i++) {
+          this.memory[curAddr++] = encoded[i];
+        }
         console.log(encoded.map((e) => e.toString(16)));
       }
     }
@@ -70,25 +73,29 @@ class Assembler {
   _encodeInstruction(sl, curAddr) {
     console.log('assembling', JSON.stringify(sl));
     switch (sl.instr.toLowerCase()) {
-      case 'add':
+      case 'add': {
         this._expectArgsCount(sl, 1);
         let r = this._argR(sl, sl.args[0]);
         return [0b10000000 | r];
-      case 'mov':
+      }
+      case 'mov': {
         this._expectArgsCount(sl, 2);
         let rd = this._argR(sl, sl.args[0]);
         let rs = this._argR(sl, sl.args[1]);
         return [0b01000000 | (rd << 3) | rs];
-      case 'mvi':
+      }
+      case 'mvi': {
         this._expectArgsCount(sl, 2);
         let r = this._argR(sl, sl.args[0]);
         let imm = this._argImm(sl, sl.args[1]);
         return [0b110 | (r << 3), imm];
-      case 'push':
+      }
+      case 'push': {
         this._expectArgsCount(sl, 1);
         let rp = this._argRP(sl, sl.args[0]);
         return [0b11000101 | (rp << 4)];
         break;
+      }
       default:
         this._assemblyError(sl.pos, `unknown instruction ${sl.instr}`);
     }
@@ -174,6 +181,11 @@ class Assembler {
   }
 }
 
+// Exports.
+module.exports.Assembler = Assembler;
+
+// --------------------------------------------- < REMOVE THIS
+
 let p = new Parser();
 
 let mult = `
@@ -200,10 +212,8 @@ AllDone:    pop  bc
             ret
 `;
 
-console.log('-------------------------------------');
-
-let sl = p.parse(mult);
-
-let asm = new Assembler();
-let mem = asm.assemble(sl);
+//console.log('-------------------------------------');
+//let sl = p.parse(mult);
+//let asm = new Assembler();
+//let mem = asm.assemble(sl);
 
