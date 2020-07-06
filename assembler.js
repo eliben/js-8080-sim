@@ -70,6 +70,15 @@ class Assembler {
   _encodeInstruction(sl, curAddr) {
     console.log('assembling', JSON.stringify(sl));
     switch (sl.instr.toLowerCase()) {
+      case 'add':
+        this._expectArgsCount(sl, 1);
+        let r = this._argR(sl, sl.args[0]);
+        return [0b10000000 | r];
+      case 'mov':
+        this._expectArgsCount(sl, 2);
+        let rd = this._argR(sl, sl.args[0]);
+        let rs = this._argR(sl, sl.args[1]);
+        return [0b01000000 | (rd << 3) | rs];
       case 'mvi':
         this._expectArgsCount(sl, 2);
         let r = this._argR(sl, sl.args[0]);
