@@ -36,3 +36,27 @@ for (let i = 0; i < N; i++) {
   CPU8080.steps(1);
   console.log(`T=${CPU8080.T()}; status=${JSON.stringify(CPU8080.status())}`);
 }
+
+let mult = `
+; multiplies b by c, puts result in hl
+
+Multiply:   push psw            ; save registers
+            push bc
+
+            mvi h, 00h
+            mvi l, 00h
+
+            mov a,b          ; the multiplier goes in a
+            cpi 00h          ; if it's 0, we're finished
+            jz AllDone
+
+            mvi b,00h
+
+MultLoop:   dad bc
+            dcr a
+            jnz MultLoop
+
+AllDone:    pop  bc
+            psw
+            ret
+`;

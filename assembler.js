@@ -187,37 +187,3 @@ class Assembler {
 
 // Exports.
 module.exports.Assembler = Assembler;
-
-// --------------------------------------------- < REMOVE THIS
-
-let p = new Parser();
-
-let mult = `
-; multiplies b by c, puts result in hl
-
-Multiply:   push psw            ; save registers
-            push bc
-
-            mvi h, 00h
-            mvi l, 00h
-
-            mov a,b          ; the multiplier goes in a
-            cpi 00h          ; if it's 0, we're finished
-            jz AllDone
-
-            mvi b,00h
-
-MultLoop:   dad bc
-            dcr a
-            jnz MultLoop
-
-AllDone:    pop  bc
-            psw
-            ret
-`;
-
-//console.log('-------------------------------------');
-//let sl = p.parse(mult);
-//let asm = new Assembler();
-//let mem = asm.assemble(sl);
-
