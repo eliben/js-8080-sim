@@ -1,0 +1,22 @@
+{
+  "name": "js-8080-sim",
+  "version": "1.0.0",
+  "description": "8080 assembler and simulator",
+  "main": "assembler.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eliben/js-8080-sim.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eliben/js-8080-sim/issues"
+  },
+  "homepage": "https://github.com/eliben/js-8080-sim#readme",
+  "devDependencies": {
+    "mocha": "^8.0.1"
+  }
+}
