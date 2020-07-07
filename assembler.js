@@ -78,6 +78,10 @@ class Assembler {
         let r = this._argR(sl, sl.args[0]);
         return [0b10000000 | r];
       }
+      case 'hlt': {
+        this._expectArgsCount(sl, 0);
+        return [0b01110110];
+      }
       case 'mov': {
         this._expectArgsCount(sl, 2);
         let rd = this._argR(sl, sl.args[0]);
