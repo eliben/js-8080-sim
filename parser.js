@@ -82,7 +82,7 @@ class Lexer {
         name: 'LABEL',
         value: this.buf.slice(this.pos, endpos).join(''),
         pos: this._lineCol(this.pos)
-      }
+      };
       this.pos = endpos + 1;
       return tok;
     } else {
@@ -109,7 +109,7 @@ class Lexer {
         pos: this._lineCol(this.pos)
       };
       this.pos = end + 1;
-      return tok
+      return tok;
     }
   }
 
@@ -149,7 +149,7 @@ class Lexer {
     }
   }
 
-  _isAlphaNum = function(c) {
+  _isAlphaNum(c) {
     return (c >= 'a' && c <= 'z') ||
            (c >= 'A' && c <= 'Z') ||
            (c >= '0' && c <= '9') ||

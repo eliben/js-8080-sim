@@ -98,12 +98,11 @@ class Assembler {
         this._expectArgsCount(sl, 1);
         let rp = this._argRP(sl, sl.args[0]);
         return [0b11000101 | (rp << 4)];
-        break;
       }
       default:
         this._assemblyError(sl.pos, `unknown instruction ${sl.instr}`);
     }
-    return 1;
+    return [];
   }
 
   _expectArgsCount(sl, count) {

@@ -9,7 +9,7 @@ mvi b, 10h
 mvi a, 20h
 add b
 hlt
-`
+`;
 
 let p = new Parser();
 let sl = p.parse(prog);
