@@ -1,5 +1,5 @@
-// Forked from https://github.com/maly/8080js
-// Original license header below.
+// Forked from https://github.com/maly/8080js with minor tweaks.
+// Original BSD-based license header below.
 //
 // Copyright (C) 2013, 2014 Martin Maly
 // 
@@ -2369,6 +2369,7 @@ exports["init"] = function(bt,ba,tck,porto,porti){
   };
 exports["status"] = function() {
     return {
+      "halted":proc.halted,
       "pc":proc.pc,
       "sp":proc.sp,
       "a":proc.a,
