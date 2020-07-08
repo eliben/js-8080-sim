@@ -6,8 +6,15 @@ const {Parser} = require('./parser.js');
 const {Assembler} = require('./assembler.js');
 const CPU8080 = require('./sim8080');
 
-class Sim8080 {
 
+class Sim8080 {
+  constructor(progText) {
+    let p = new Parser();
+    let asm = new Assembler();
+
+    this.sourceLines = p.parse(prog);
+    this.mem = asm.assemble(sourceLines);
+  }
 }
 
 describe('sim', () => {
