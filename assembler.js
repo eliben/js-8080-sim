@@ -2,10 +2,6 @@
 
 const {Parser} = require('./parser.js');
 
-//for (let r of res) {
-  //console.log(JSON.stringify(r, null, 2));
-//}
-
 // TODO: should produce a raw memory map with assembled code, array of memory
 // essentially (64 KiB?)
 //
@@ -58,7 +54,7 @@ class Assembler {
         for (let i = 0; i < encoded.length; i++) {
           this.memory[curAddr++] = encoded[i];
         }
-        console.log(encoded.map((e) => e.toString(16)));
+        //console.log(encoded.map((e) => e.toString(16)));
       }
     }
   }
@@ -71,7 +67,7 @@ class Assembler {
   // the labelsToFixups field when it encounters label references.
   // Follows encodings in http://www.classiccmp.org/dunfield/r/8080.txt
   _encodeInstruction(sl, curAddr) {
-    console.log('assembling', JSON.stringify(sl));
+    //console.log('assembling', JSON.stringify(sl));
     switch (sl.instr.toLowerCase()) {
       case 'add': {
         this._expectArgsCount(sl, 1);
