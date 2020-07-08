@@ -1,8 +1,14 @@
+'use strict';
+
 const assert = require('assert').strict;
 
 const {Parser} = require('./parser.js');
 const {Assembler} = require('./assembler.js');
 const CPU8080 = require('./sim8080');
+
+class Sim8080 {
+
+}
 
 describe('sim', () => {
   it('foo1', () => {
@@ -38,9 +44,10 @@ describe('sim', () => {
 
     console.log(CPU8080.status());
     assert.equal(CPU8080.status().a, 0x30);
+    assert.ok(CPU8080.status().halted);
   });
 });
 
 it('should return true', () => {
-  assert.equal(true, true)
-})
+  assert.equal(true, true);
+});

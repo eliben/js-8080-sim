@@ -1,7 +1,8 @@
 .PHONY: lint test
 
 lint:
-	jshint --exclude sim8080.js .
+	# jshint uses .jshintignore and .jshintrc
+	jshint sim8080.js .
 
 test:
 	npm test

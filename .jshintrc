@@ -1,5 +1,8 @@
 {
     "esversion": 6,
+    "strict": "global",
+
+    // environments
     "node": true,
-    "strict": "global"
+    "mocha": true
 }
