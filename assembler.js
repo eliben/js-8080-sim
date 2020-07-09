@@ -92,14 +92,33 @@ class Assembler {
         let imm = this._argImm(sl, sl.args[0]);
         return [0b11111110, imm];
       }
+      case 'dad': {
+        this._expectArgsCount(sl, 1);
+        let rp = this._argRP(sl, sl.args[0]);
+        return [0b00001001 | (rp << 4)];
+      }
+      case 'dcr': {
+        this._expectArgsCount(sl, 1);
+        let r = this._argR(sl, sl.args[0]);
+        return [0b00000101 | (r << 3)];
+      }
       case 'hlt': {
         this._expectArgsCount(sl, 0);
         return [0b01110110];
       }
+      case 'jnz':
       case 'jz': {
         this._expectArgsCount(sl, 1);
         this._argLabel(sl, sl.args[0], curAddr);
-        return [0b11001010, 0, 0];
+
+        let ie = 0;
+        switch (sl.instr.toLowerCase()) {
+          case 'jz': ie = 0b11001010; break;
+          case 'jnz': ie = 0b11000010; break;
+          default:
+            this._assemblyError(sl.pos, `unknown instruction ${sl.instr}`);
+        }
+        return [ie, 0, 0];
       }
       case 'mov': {
         this._expectArgsCount(sl, 2);
