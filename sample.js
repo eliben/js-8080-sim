@@ -30,8 +30,9 @@ MultLoop:   dad bc
             dcr a
             jnz MultLoop
 
+            lxi bc, 3040h
 AllDone:    pop  bc
-            psw
+            pop psw
             ret
 `;
 

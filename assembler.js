@@ -54,6 +54,9 @@ class Assembler {
           this._assemblyError(sl.pos, `duplicate label "${sl.label}"`);
         }
 
+        if (this.tracing) {
+          console.log(`Setting label ${sl.label}=0x${curAddr.toString(16)}`);
+        }
         this.labelToAddr.set(sl.label, curAddr);
       }
 
@@ -61,7 +64,7 @@ class Assembler {
       if (sl.instr !== null) {
         let encoded = this._encodeInstruction(sl, curAddr);
         if (this.tracing) {
-          console.log(`@${curAddr.toString(16)} =>`, encoded.map((e) => e.toString(16)));
+          console.log(`0x${curAddr.toString(16)} =>`, encoded.map((e) => e.toString(16)));
         }
         for (let i = 0; i < encoded.length; i++) {
           this.memory[curAddr++] = encoded[i];
@@ -120,6 +123,13 @@ class Assembler {
         }
         return [ie, 0, 0];
       }
+      case 'lxi': {
+        this._expectArgsCount(sl, 2);
+        let rp = this._argRP(sl, sl.args[0]);
+        let num = this._argImmOrLabel(sl, sl.args[1]);
+        // 16-bit immediates encoded litte-endian.
+        return [0b00000001 | (rp << 4), num & 0xff, (num >> 8) & 0xff];
+      }
       case 'mov': {
         this._expectArgsCount(sl, 2);
         let rd = this._argR(sl, sl.args[0]);
@@ -132,10 +142,19 @@ class Assembler {
         let imm = this._argImm(sl, sl.args[1]);
         return [0b110 | (r << 3), imm];
       }
+      case 'pop': {
+        this._expectArgsCount(sl, 1);
+        let rp = this._argRP(sl, sl.args[0]);
+        return [0b11000001 | (rp << 4)];
+      }
       case 'push': {
         this._expectArgsCount(sl, 1);
         let rp = this._argRP(sl, sl.args[0]);
         return [0b11000101 | (rp << 4)];
+      }
+      case 'ret': {
+        this._expectArgsCount(sl, 0);
+        return [0b11001001];
       }
       default:
         this._assemblyError(sl.pos, `unknown instruction ${sl.instr}`);
@@ -196,7 +215,26 @@ class Assembler {
     if (!this.labelToFixups.has(arg)) {
       this.labelToFixups.set(arg, [curAddr]);
     } else {
-      this.labelToAddr.get(arg).push(curAddr);
+      this.labelToFixups.get(arg).push(curAddr);
+    }
+
+    if (this.tracing) {
+      console.log(`fixups for '${arg}': ${this.labelToFixups.get(arg)}`);
+    }
+  }
+
+  // Arg can be either an immediate (if it looks like a number) or a label (if
+  // it doesn't). Its value is returned in any case, as a number. For labels,
+  // a 0 is returned and the fixup map is updated.
+  _argImmOrLabel(sl, arg, curAddr) {
+    let n = this._parseNumber(arg);
+    if (isNaN(n)) {
+      // Label.
+      this._argLabel(sl, arg, curAddr);
+      return 0;
+    } else {
+      // Number.
+      return n;
     }
   }
 
