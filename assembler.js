@@ -102,7 +102,7 @@ class Assembler {
           let vals = this.memory.slice(user.addr, user.addr + 3).map(
             (val) => {return val.toString(16)});
 
-          console.log(`applied fixup at 0x${user.addr.toString()}: [${vals}]`);
+          console.log(`applied fixup at 0x${user.addr.toString(16)}: [${vals}]`);
         }
       }
     }
