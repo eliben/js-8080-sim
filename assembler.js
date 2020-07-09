@@ -23,8 +23,11 @@ class Assembler {
     // these labels are requested. This is filled up during assembly when we
     // encounter refereces to labels. In the fixup stage these are applied to
     // the proper places in the final memory map.
-    // TODO: this can also help detect labels that were referenced but never
-    // defined
+    // Each entry in this map is an object:
+    // {
+    //    addr: the address where the fixup is needed,
+    //    pos: reference to this label in the source
+    // }
     this.labelToFixups = new Map();
 
     // tracing sets a tracing/debugging mode for the assembler where it reports
@@ -74,6 +77,35 @@ class Assembler {
   }
 
   _applyFixups() {
+    for (let label of this.labelToFixups.keys()) {
+      let addr = this.labelToAddr.get(label);
+      if (addr === undefined) {
+        const user = this.labelToFixups.get(label)[0];
+        this._assemblyError(user.pos, `label '${label}' used but not defined`);
+      }
+
+      let addrLowByte = addr & 0xff;
+      let addrHighByte = (addr >> 8) & 0xff;
+      // Label is defined. Apply its address in each user location. User
+      // locations point to an instruction:
+      //
+      //   mem: [...., instr opcode, <low byte slot>, <high byte slot>, ...]
+      //                    ^
+      //                    |
+      //                 user.addr
+      //
+      for (let user of this.labelToFixups.get(label)) {
+        this.memory[user.addr + 1] = addrLowByte;
+        this.memory[user.addr + 2] = addrHighByte;
+
+        if (this.tracing) {
+          let vals = this.memory.slice(user.addr, user.addr + 3).map(
+            (val) => {return val.toString(16)});
+
+          console.log(`applied fixup at 0x${user.addr.toString()}: [${vals}]`);
+        }
+      }
+    }
   }
 
   // Encodes the instruction in source line sl into an array of numbers,
@@ -237,13 +269,13 @@ class Assembler {
     }
 
     if (!this.labelToFixups.has(arg)) {
-      this.labelToFixups.set(arg, [curAddr]);
+      this.labelToFixups.set(arg, [{addr: curAddr, pos: sl.pos}]);
     } else {
-      this.labelToFixups.get(arg).push(curAddr);
+      this.labelToFixups.get(arg).push({addr: curAddr, pos: sl.pos});
     }
 
     if (this.tracing) {
-      console.log(`fixups for '${arg}': ${this.labelToFixups.get(arg)}`);
+      console.log(`fixups for '${arg}': ${JSON.stringify(this.labelToFixups.get(arg))}`);
     }
   }
 
