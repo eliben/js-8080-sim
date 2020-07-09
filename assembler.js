@@ -123,6 +123,18 @@ class Assembler {
         }
         return [ie, 0, 0];
       }
+      case 'lda': {
+        this._expectArgsCount(sl, 1);
+        let num = this._argImmOrLabel(sl, sl.args[1]);
+        // 16-bit immediates encoded litte-endian.
+        return [0b00111010 | (rp << 4), num & 0xff, (num >> 8) & 0xff];
+      }
+      case 'lhld': {
+        this._expectArgsCount(sl, 1);
+        let num = this._argImmOrLabel(sl, sl.args[1]);
+        // 16-bit immediates encoded litte-endian.
+        return [0b00101010 | (rp << 4), num & 0xff, (num >> 8) & 0xff];
+      }
       case 'lxi': {
         this._expectArgsCount(sl, 2);
         let rp = this._argRP(sl, sl.args[0]);
@@ -151,6 +163,18 @@ class Assembler {
         this._expectArgsCount(sl, 1);
         let rp = this._argRP(sl, sl.args[0]);
         return [0b11000101 | (rp << 4)];
+      }
+      case 'sta': {
+        this._expectArgsCount(sl, 1);
+        let num = this._argImmOrLabel(sl, sl.args[1]);
+        // 16-bit immediates encoded litte-endian.
+        return [0b00110010 | (rp << 4), num & 0xff, (num >> 8) & 0xff];
+      }
+      case 'shld': {
+        this._expectArgsCount(sl, 1);
+        let num = this._argImmOrLabel(sl, sl.args[1]);
+        // 16-bit immediates encoded litte-endian.
+        return [0b00100010 | (rp << 4), num & 0xff, (num >> 8) & 0xff];
       }
       case 'ret': {
         this._expectArgsCount(sl, 0);
