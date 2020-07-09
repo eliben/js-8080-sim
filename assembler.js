@@ -26,12 +26,21 @@ class Assembler {
     // TODO: this can also help detect labels that were referenced but never
     // defined
     this.labelToFixups = new Map();
+
+    // tracing sets a tracing/debugging mode for the assembler where it reports
+    // all the instructions it's processing and their encodings.
+    this.tracing = false;
   }
 
   assemble(sourceLines) {
     this._assembleInstructions(sourceLines);
     this._applyFixups();
     return this.memory;
+  }
+
+  // Set tracing mode: true or false;
+  setTracing(tracing) {
+    this.tracing = tracing;
   }
 
   _assembleInstructions(sourceLines) {
@@ -51,10 +60,12 @@ class Assembler {
       // Instruction encoding here.
       if (sl.instr !== null) {
         let encoded = this._encodeInstruction(sl, curAddr);
+        if (this.tracing) {
+          console.log(`@${curAddr.toString(16)} =>`, encoded.map((e) => e.toString(16)));
+        }
         for (let i = 0; i < encoded.length; i++) {
           this.memory[curAddr++] = encoded[i];
         }
-        //console.log(encoded.map((e) => e.toString(16)));
       }
     }
   }
@@ -67,16 +78,28 @@ class Assembler {
   // the labelsToFixups field when it encounters label references.
   // Follows encodings in http://www.classiccmp.org/dunfield/r/8080.txt
   _encodeInstruction(sl, curAddr) {
-    //console.log('assembling', JSON.stringify(sl));
+    if (this.tracing) {
+      console.log('assembling', JSON.stringify(sl));
+    }
     switch (sl.instr.toLowerCase()) {
       case 'add': {
         this._expectArgsCount(sl, 1);
         let r = this._argR(sl, sl.args[0]);
         return [0b10000000 | r];
       }
+      case 'cpi': {
+        this._expectArgsCount(sl, 1);
+        let imm = this._argImm(sl, sl.args[0]);
+        return [0b11111110, imm];
+      }
       case 'hlt': {
         this._expectArgsCount(sl, 0);
         return [0b01110110];
+      }
+      case 'jz': {
+        this._expectArgsCount(sl, 1);
+        this._argLabel(sl, sl.args[0], curAddr);
+        return [0b11001010, 0, 0];
       }
       case 'mov': {
         this._expectArgsCount(sl, 2);
@@ -140,9 +163,22 @@ class Assembler {
   _argImm(sl, arg) {
     let n = this._parseNumber(arg);
     if (isNaN(n)) {
-      this._assemblyError(sl.post, `invalid immediate ${arg}`);
+      this._assemblyError(sl.pos, `invalid immediate ${arg}`);
     }
     return n;
+  }
+
+  // Expect arg to be a label name and add an entry in labelToFixups for it.
+  _argLabel(sl, arg, curAddr) {
+    if (!/^[a-zA-Z_][a-zA-Z_0-9]/.test(arg)) {
+      this._assemblyError(sl.pos, `invalid label name ${arg}`);
+    }
+
+    if (!this.labelToFixups.has(arg)) {
+      this.labelToFixups.set(arg, [curAddr]);
+    } else {
+      this.labelToAddr.get(arg).push(curAddr);
+    }
   }
 
   // Parses numbers in accepted asm format (24, 1Ah, 0101b)
