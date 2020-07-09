@@ -7,51 +7,49 @@ const {Assembler} = require('./assembler.js');
 const CPU8080 = require('./sim8080');
 
 
-class Sim8080 {
-  constructor(progText) {
-    let p = new Parser();
-    let asm = new Assembler();
+// runProg runs the assembly program in progText and returns a pair of
+// [cpu state, memory map] after the program halts.
+// If maxSteps is provided, runs up to maxSteps steps (otherwise a default upper
+// limit is applied to avoid hanging).
+// TODO: it sucks that CPU8080 manipulates global state; fix it.
+function runProg(progText, maxSteps) {
+  let p = new Parser();
+  let asm = new Assembler();
+  let sourceLines = p.parse(progText);
+  let mem = asm.assemble(sourceLines);
 
-    this.sourceLines = p.parse(prog);
-    this.mem = asm.assemble(sourceLines);
+  const memoryTo = (addr, value) => {mem[addr] = value;};
+  const memoryAt = (addr) => {return mem[addr];};
+  CPU8080.init(memoryTo, memoryAt);
+  CPU8080.set('PC', 0);
+
+  if (maxSteps === undefined) {
+    maxSteps = 50000;
   }
+
+  for (let i = 0; i < maxSteps; i++) {
+    CPU8080.steps(1);
+
+    if (CPU8080.status().halted) {
+      break;
+    }
+  }
+
+  return [CPU8080.status(), mem];
 }
 
 describe('sim', () => {
-  it('foo1', () => {
-    let prog = `
-    mvi b, 10h
-    mvi a, 20h
-    add b
-    hlt
-    `;
-    let p = new Parser();
-    let sl = p.parse(prog);
-    let asm = new Assembler();
-    let mem = asm.assemble(sl);
+  it('movadd', () => {
+    let [state, mem] = runProg(`
+      mvi b, 12h
+      mvi a, 23h
+      add b
+      hlt
+      `);
 
-    // Set up memory access functions for the simulator.
-    function memoryTo(addr, value) {
-      mem[addr] = value;
-    }
-
-    function memoryAt(addr) {
-      return mem[addr];
-    }
-
-    // Initialize simulator, and set PC=0 explicitly.
-    CPU8080.init(memoryTo, memoryAt);
-    CPU8080.set('PC', 0);
-
-    let N = 10;
-
-    for (let i = 0; i < N; i++) {
-      CPU8080.steps(1);
-    }
-
-    console.log(CPU8080.status());
-    assert.equal(CPU8080.status().a, 0x30);
-    assert.ok(CPU8080.status().halted);
+    console.log(state);
+    assert.ok(state.halted);
+    assert.equal(state.a, 0x35);
   });
 });
 
