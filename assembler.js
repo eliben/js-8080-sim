@@ -146,15 +146,27 @@ class Assembler {
         this._expectArgsCount(sl, 0);
         return [0b01110110];
       }
+      case 'jc':
+      case 'jmp':
       case 'jnz':
+      case 'jnc':
+      case 'jp':
+      case 'jpo':
+      case 'jpe':
       case 'jz': {
         this._expectArgsCount(sl, 1);
         this._argLabel(sl, sl.args[0], curAddr);
 
         let ie = 0;
         switch (sl.instr.toLowerCase()) {
-          case 'jz': ie = 0b11001010; break;
+          case 'jc':  ie = 0b11011010; break;
+          case 'jmp': ie = 0b11000011; break;
+          case 'jnc': ie = 0b11010010; break;
+          case 'jz':  ie = 0b11001010; break;
           case 'jnz': ie = 0b11000010; break;
+          case 'jp':  ie = 0b11110010; break;
+          case 'jpo': ie = 0b11100010; break;
+          case 'jpe': ie = 0b11101010; break;
           default:
             this._assemblyError(sl.pos, `unknown instruction ${sl.instr}`);
         }

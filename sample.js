@@ -4,13 +4,6 @@ const {Parser} = require('./parser.js');
 const {Assembler} = require('./assembler.js');
 const CPU8080 = require('./sim8080');
 
-let prog = `
-mvi b, 10h
-mvi a, 20h
-add b
-hlt
-`;
-
 let mult = `
 ; multiplies b by c, puts result in hl
 
@@ -36,47 +29,20 @@ AllDone:    pop  bc
             ret
 `;
 
-let testjmp = `
-  mvi a, 1h
-  dcr a
-  jz YesZero
-  jnz NoZero
-
-YesZero:
-  mvi c, 20
-  hlt
-
-NoZero:
-  mvi c, 50
-  hlt
+let testchainjmp = `
+      mvi a, 50
+      mvi b, 20
+      mvi c, 100
+      jmp Uno
+Tres: add b
+      hlt
+Uno:  jmp Dos
+      add c
+Dos:  jmp Tres
+      add c
 `;
 
-let teststack = `
-  mvi a, 20
-  mvi b, 30
-  push bc
-  mvi b, 50
-  add b
-  pop bc
-  add b
-  hlt
-`;
-
-let testcallret = `
-  mvi b, 35
-  mvi c, 22
-  call Sub
-  hlt
-  
-    ; This subroutine adds b into c, and clobbers a.
-Sub:
-  mov a, b
-  add c
-  mov c, a
-  ret
-`;
-
-prog = testcallret;
+let prog = testchainjmp;
 
 let p = new Parser();
 let sl = p.parse(prog);

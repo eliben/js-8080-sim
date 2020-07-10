@@ -107,6 +107,24 @@ describe('sim', () => {
     assert.equal(state.a, 100);
   });
 
+  it('chainjmp', () => {
+    let [state, mem] = runProg(`
+          mvi a, 50
+          mvi b, 20
+          mvi c, 100
+          jmp Uno
+    Tres: add b
+          hlt
+    Uno:  jmp Dos
+          add c
+    Dos:  jmp Tres
+          add c
+    `);
+
+    assert.ok(state.halted);
+    assert.equal(state.a, 70);
+  });
+
   it('callret', () => {
     let [state, mem] = runProg(`
       mvi b, 35
