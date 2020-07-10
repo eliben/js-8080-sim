@@ -51,7 +51,32 @@ NoZero:
   hlt
 `;
 
-prog = testjmp;
+let teststack = `
+  mvi a, 20
+  mvi b, 30
+  push bc
+  mvi b, 50
+  add b
+  pop bc
+  add b
+  hlt
+`;
+
+let testcallret = `
+  mvi b, 35
+  mvi c, 22
+  call Sub
+  hlt
+  
+    ; This subroutine adds b into c, and clobbers a.
+Sub:
+  mov a, b
+  add c
+  mov c, a
+  ret
+`;
+
+prog = testcallret;
 
 let p = new Parser();
 let sl = p.parse(prog);

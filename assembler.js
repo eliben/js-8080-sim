@@ -122,6 +122,11 @@ class Assembler {
         let r = this._argR(sl, sl.args[0]);
         return [0b10000000 | r];
       }
+      case 'call': {
+        this._expectArgsCount(sl, 1);
+        this._argLabel(sl, sl.args[0], curAddr);
+        return [0b11001101, 0, 0];
+      }
       case 'cpi': {
         this._expectArgsCount(sl, 1);
         let imm = this._argImm(sl, sl.args[0]);

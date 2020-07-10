@@ -90,8 +90,39 @@ describe('sim', () => {
     assert.ok(state.halted);
     assert.equal(state.c, 50);
   });
-});
 
-it('should return true', () => {
-  assert.equal(true, true);
+  it('stack', () => {
+    let [state, mem] = runProg(`
+      mvi a, 20
+      mvi b, 30
+      push bc
+      mvi b, 50
+      add b
+      pop bc
+      add b
+      hlt
+    `);
+
+    assert.ok(state.halted);
+    assert.equal(state.a, 100);
+  });
+
+  it('callret', () => {
+    let [state, mem] = runProg(`
+      mvi b, 35
+      mvi c, 22
+      call Sub
+      hlt
+      
+        ; This subroutine adds b into c, and clobbers a.
+    Sub:
+      mov a, b
+      add c
+      mov c, a
+      ret
+    `);
+
+    assert.ok(state.halted);
+    assert.equal(state.c, 57);
+  });
 });
