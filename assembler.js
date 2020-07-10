@@ -100,7 +100,7 @@ class Assembler {
 
         if (this.tracing) {
           let vals = this.memory.slice(user.addr, user.addr + 3).map(
-            (val) => {return val.toString(16)});
+            (val) => {return val.toString(16);});
 
           console.log(`applied fixup at 0x${user.addr.toString(16)}: [${vals}]`);
         }
@@ -159,20 +159,20 @@ class Assembler {
         this._expectArgsCount(sl, 1);
         let num = this._argImmOrLabel(sl, sl.args[1]);
         // 16-bit immediates encoded litte-endian.
-        return [0b00111010 | (rp << 4), num & 0xff, (num >> 8) & 0xff];
+        return [0b00111010, num & 0xff, (num >> 8) & 0xff];
       }
       case 'lhld': {
         this._expectArgsCount(sl, 1);
         let num = this._argImmOrLabel(sl, sl.args[1]);
         // 16-bit immediates encoded litte-endian.
-        return [0b00101010 | (rp << 4), num & 0xff, (num >> 8) & 0xff];
+        return [0b00101010, num & 0xff, (num >> 8) & 0xff];
       }
       case 'lxi': {
         this._expectArgsCount(sl, 2);
         let rp = this._argRP(sl, sl.args[0]);
         let num = this._argImmOrLabel(sl, sl.args[1]);
         // 16-bit immediates encoded litte-endian.
-        return [0b00000001 | (rp << 4), num & 0xff, (num >> 8) & 0xff];
+        return [0b00000001, num & 0xff, (num >> 8) & 0xff];
       }
       case 'mov': {
         this._expectArgsCount(sl, 2);
@@ -200,13 +200,13 @@ class Assembler {
         this._expectArgsCount(sl, 1);
         let num = this._argImmOrLabel(sl, sl.args[1]);
         // 16-bit immediates encoded litte-endian.
-        return [0b00110010 | (rp << 4), num & 0xff, (num >> 8) & 0xff];
+        return [0b00110010, num & 0xff, (num >> 8) & 0xff];
       }
       case 'shld': {
         this._expectArgsCount(sl, 1);
         let num = this._argImmOrLabel(sl, sl.args[1]);
         // 16-bit immediates encoded litte-endian.
-        return [0b00100010 | (rp << 4), num & 0xff, (num >> 8) & 0xff];
+        return [0b00100010, num & 0xff, (num >> 8) & 0xff];
       }
       case 'ret': {
         this._expectArgsCount(sl, 0);

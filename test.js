@@ -47,9 +47,48 @@ describe('sim', () => {
       hlt
       `);
 
-    console.log(state);
     assert.ok(state.halted);
     assert.equal(state.a, 0x35);
+  });
+
+  it('jzlabel', () => {
+    let [state, mem] = runProg(`
+      mvi a, 1h
+      dcr a
+      jz YesZero
+      jnz NoZero
+
+    YesZero:
+      mvi c, 20
+      hlt
+
+    NoZero:
+      mvi c, 50
+      hlt
+    `);
+
+    assert.ok(state.halted);
+    assert.equal(state.c, 20);
+  });
+
+  it('jnzlabel', () => {
+    let [state, mem] = runProg(`
+      mvi a, 2h
+      dcr a
+      jz YesZero
+      jnz NoZero
+
+    YesZero:
+      mvi c, 20
+      hlt
+
+    NoZero:
+      mvi c, 50
+      hlt
+    `);
+
+    assert.ok(state.halted);
+    assert.equal(state.c, 50);
   });
 });
 
