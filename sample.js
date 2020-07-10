@@ -36,7 +36,22 @@ AllDone:    pop  bc
             ret
 `;
 
-prog = mult;
+let testjmp = `
+  mvi a, 1h
+  dcr a
+  jz YesZero
+  jnz NoZero
+
+YesZero:
+  mvi c, 20
+  hlt
+
+NoZero:
+  mvi c, 50
+  hlt
+`;
+
+prog = testjmp;
 
 let p = new Parser();
 let sl = p.parse(prog);
@@ -57,11 +72,15 @@ function memoryAt(addr) {
 CPU8080.init(memoryTo, memoryAt);
 CPU8080.set('PC', 0);
 
-let N = 10;
+let N = 100;
 
 // TODO: note, 0x00 is NOPs, so it will just keep executing.
 for (let i = 0; i < N; i++) {
   CPU8080.steps(1);
   console.log(`T=${CPU8080.T()}; status=${JSON.stringify(CPU8080.status())}`);
+  
+  if (CPU8080.status().halted) {
+    break;
+  }
 }
 
