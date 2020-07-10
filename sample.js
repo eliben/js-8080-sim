@@ -42,7 +42,14 @@ Dos:  jmp Tres
       add c
 `;
 
-let prog = testchainjmp;
+let loadadd16bit = `
+  lxi hl, 1234h
+  lxi bc, 4567h
+  dad bc
+  hlt
+`;
+
+let prog = loadadd16bit;
 
 let p = new Parser();
 let sl = p.parse(prog);

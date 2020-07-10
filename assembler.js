@@ -189,7 +189,7 @@ class Assembler {
         let rp = this._argRP(sl, sl.args[0]);
         let num = this._argImmOrLabel(sl, sl.args[1]);
         // 16-bit immediates encoded litte-endian.
-        return [0b00000001, num & 0xff, (num >> 8) & 0xff];
+        return [0b00000001 | (rp << 4), num & 0xff, (num >> 8) & 0xff];
       }
       case 'mov': {
         this._expectArgsCount(sl, 2);

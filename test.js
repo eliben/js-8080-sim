@@ -143,4 +143,17 @@ describe('sim', () => {
     assert.ok(state.halted);
     assert.equal(state.c, 57);
   });
+
+  it('loadadd16bit', () => {
+    let [state, mem] = runProg(`
+      lxi hl, 1234h
+      lxi bc, 4567h
+      dad bc
+      hlt
+    `);
+
+    assert.ok(state.halted);
+    assert.equal(state.h, 0x57);
+    assert.equal(state.l, 0x9b);
+  });
 });
