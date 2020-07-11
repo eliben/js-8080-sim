@@ -32,7 +32,7 @@ CPU8080.set('PC', 0);
 
 let N = 10000;
 
-// TODO: note, 0x00 is NOPs, so it will just keep executing.
+// note, 0x00 is NOPs, so it will just keep executing.
 for (let i = 0; i < N; i++) {
   CPU8080.steps(1);
   console.log(`T=${CPU8080.T()}; status=${JSON.stringify(CPU8080.status())}`);
