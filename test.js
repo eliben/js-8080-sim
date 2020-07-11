@@ -415,4 +415,19 @@ There:  mvi a, 30
     assert.ok(state.halted);
     assert.equal(state.a, 0b01000010);
   });
+
+  it('bitwise-rotate', () => {
+    let [state, mem] = runProg(`
+       mvi a, 11101110b
+       rlc
+       mov b, a
+       mvi a, 11101110b
+       rrc
+       hlt
+      `);
+
+    assert.ok(state.halted);
+    assert.equal(state.a, 0b01110111, 'a');
+    assert.equal(state.b, 0b11011101, 'b');
+  });
 });

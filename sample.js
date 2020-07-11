@@ -5,10 +5,8 @@ const {Assembler} = require('./assembler.js');
 const CPU8080 = require('./sim8080');
 
 let prog = `
-       mvi a, 11111111b
-       mvi b, 11101110b
-       ani 11111101b
-       ana b
+       mvi a, 11101110b
+       rlc
        hlt
 `;
 
