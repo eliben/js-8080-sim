@@ -130,10 +130,26 @@ class Assembler {
         let imm = this._argImm(sl, sl.args[0]);
         return [0b11000110, imm];
       }
-      case 'call': {
+      case 'call':
+      case 'cc':
+      case 'cnc':
+      case 'cnz':
+      case 'cm':
+      case 'cp':
+      case 'cpe':
+      case 'cpo':
+      case 'cz': {
         this._expectArgsCount(sl, 1);
         this._argLabel(sl, sl.args[0], curAddr);
-        return [0b11001101, 0, 0];
+
+        let ie = 0;
+        if (sl.instr.toLowerCase() === 'call') {
+          ie = 0b11001101;
+        } else {
+          let ccc = sl.instr.toLowerCase().slice(1);
+          ie = 0b11000100 | (this._translateCCC(ccc, sl) << 3);
+        }
+        return [ie, 0, 0];
       }
       case 'cmp': {
         this._expectArgsCount(sl, 1);
@@ -169,12 +185,13 @@ class Assembler {
         return [0b00000100 | (r << 3)];
       }
       case 'jc':
+      case 'jm':
       case 'jmp':
-      case 'jnz':
       case 'jnc':
+      case 'jnz':
       case 'jp':
-      case 'jpo':
       case 'jpe':
+      case 'jpo':
       case 'jz': {
         this._expectArgsCount(sl, 1);
         this._argLabel(sl, sl.args[0], curAddr);
