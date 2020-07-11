@@ -278,4 +278,20 @@ AllDone:    pop  bc
     assert.ok(state.halted);
     assert.equal(state.a, 109);
   });
+
+
+  it('pchl', () => {
+    let [state, mem] = runProg(`
+        lxi hl, There
+        pchl
+        mvi a, 20
+        hlt
+
+There:  mvi a, 30
+        hlt
+      `);
+
+    assert.ok(state.halted);
+    assert.equal(state.a, 30);
+  });
 });

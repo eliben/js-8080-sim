@@ -241,6 +241,10 @@ class Assembler {
         this._expectArgsCount(sl, 0);
         return [0b00000000];
       }
+      case 'pchl': {
+        this._expectArgsCount(sl, 0);
+        return [0b11101001];
+      }
       case 'pop': {
         this._expectArgsCount(sl, 1);
         let rp = this._argRP(sl, sl.args[0]);

@@ -5,12 +5,13 @@ const {Assembler} = require('./assembler.js');
 const CPU8080 = require('./sim8080');
 
 let prog = `
-  mvi a, 20
-  mvi b, 5
+        lxi hl, There
+        pchl
+        mvi a, 20
+        hlt
 
-  sub b
-  sbi 7
-  hlt
+There:  mvi a, 30
+        hlt
 `;
 
 let p = new Parser();
