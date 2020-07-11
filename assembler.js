@@ -1,12 +1,5 @@
 'use strict';
 
-const {Parser} = require('./parser.js');
-
-// TODO: should produce a raw memory map with assembled code, array of memory
-// essentially (64 KiB?)
-//
-// Needs a fixup step to patch labels.
-
 const MEMORY_SIZE = 64 * 1024;
 
 class Assembler {

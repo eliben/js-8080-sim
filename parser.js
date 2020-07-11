@@ -1,8 +1,5 @@
 'use strict';
 
-// TODO: clean up this file from all the printouts and code samples -- move them
-// elsewhere.
-
 // Lexer for 8080 assembly.
 // Usage: create it given the input as an array of chars. Then repeatedly
 // call token() until it returns null.
