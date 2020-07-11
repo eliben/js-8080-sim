@@ -303,6 +303,7 @@ class Assembler {
       case 'e': return 0b011;
       case 'h': return 0b100;
       case 'l': return 0b101;
+      case 'm': return 0b110;
       default:
         this._assemblyError(sl.pos, `invalid register ${arg}`);
     }

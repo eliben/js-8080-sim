@@ -11,27 +11,15 @@ let loadadd16bit = `
   hlt
 `;
 
-// TODO: add 'em up
 let trydb = `
-  mvi d, 0
-  lxi bc, myArray
-
-  ; Each iteration: load next item from myArray (until finding 0) into a. Add
-  ; d <- d+a.
-Loop:
-  ldax bc
-  cpi 0
-  jz Done
-  add d
-  mov d, a
-  inr c
-  jmp Loop
-
-Done:
+  lxi hl, myArray
+  mov b, m
+  inr l
+  mov c m
   hlt
 
 myArray:
-  db 10, 20, 30, 10h, 20h, 0
+  db 10, 20
 `;
 
 let prog = trydb;

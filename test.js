@@ -157,6 +157,23 @@ describe('sim', () => {
     assert.equal(state.l, 0x9b);
   });
 
+  it('movindirect', () => {
+    let [state, mem] = runProg(`
+      lxi hl, myArray
+      mov b, m
+      inr l
+      mov c m
+      hlt
+
+    myArray:
+      db 10, 20
+    `);
+
+    assert.ok(state.halted);
+    assert.equal(state.b, 10);
+    assert.equal(state.c, 20);
+  });
+
   it('mult', () => {
     let [state, mem] = runProg(`
             mvi b, 44
@@ -192,11 +209,12 @@ AllDone:    pop  bc
 
   it('adduparray', () => {
     let [state, mem] = runProg(`
+      ; The sum will be accumulated into d
       mvi d, 0
       lxi bc, myArray
 
-      ; Each iteration: load next item from myArray (until finding 0) into a. Add
-      ; d <- d+a.
+      ; Each iteration: load next item from myArray
+      ; (until finding 0) into a. Then do d <- d+a.
     Loop:
       ldax bc
       cpi 0
