@@ -4,36 +4,14 @@ const {Parser} = require('./parser.js');
 const {Assembler} = require('./assembler.js');
 const CPU8080 = require('./sim8080');
 
-let loadadd16bit = `
-  lxi hl, 1234h
-  lxi bc, 4567h
-  dad bc
+let prog = `
+  mvi a, 20
+  mvi b, 5
+
+  sub b
+  sbi 7
   hlt
 `;
-
-let trydb = `
-      ; The sum will be accumulated into a
-      mvi a, 0
-      lxi hl, myArray
-
-      ; c is the counter
-      mvi c, 5
-
-    Loop:
-      add m
-      inr l
-      dcr c
-      jz Done
-      jmp Loop
-
-    Done:
-      hlt
-
-    myArray:
-      db 10, 20, 30, 10h, 20h
-`;
-
-let prog = trydb;
 
 let p = new Parser();
 let sl = p.parse(prog);

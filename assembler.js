@@ -251,6 +251,16 @@ class Assembler {
         let rp = this._argRP(sl, sl.args[0]);
         return [0b11000101 | (rp << 4)];
       }
+      case 'ret': {
+        this._expectArgsCount(sl, 0);
+        return [0b11001001];
+      }
+      case 'shld': {
+        this._expectArgsCount(sl, 1);
+        let num = this._argImmOrLabel(sl, sl.args[1]);
+        // 16-bit immediates encoded litte-endian.
+        return [0b00100010, num & 0xff, (num >> 8) & 0xff];
+      }
       case 'sta': {
         this._expectArgsCount(sl, 1);
         let num = this._argImmOrLabel(sl, sl.args[1]);
@@ -262,15 +272,25 @@ class Assembler {
         let rp = this._argRP(sl, sl.args[0]);
         return [0b00000010 | (rp << 4)];
       }
-      case 'shld': {
+      case 'sbb': {
         this._expectArgsCount(sl, 1);
-        let num = this._argImmOrLabel(sl, sl.args[1]);
-        // 16-bit immediates encoded litte-endian.
-        return [0b00100010, num & 0xff, (num >> 8) & 0xff];
+        let r = this._argR(sl, sl.args[0]);
+        return [0b10011000 | r];
       }
-      case 'ret': {
-        this._expectArgsCount(sl, 0);
-        return [0b11001001];
+      case 'sbi': {
+        this._expectArgsCount(sl, 1);
+        let imm = this._argImm(sl, sl.args[0]);
+        return [0b11011110, imm];
+      }
+      case 'sub': {
+        this._expectArgsCount(sl, 1);
+        let r = this._argR(sl, sl.args[0]);
+        return [0b10010000 | r];
+      }
+      case 'sui': {
+        this._expectArgsCount(sl, 1);
+        let imm = this._argImm(sl, sl.args[0]);
+        return [0b11010110, imm];
       }
       default:
         this._assemblyError(sl.pos, `unknown instruction ${sl.instr}`);

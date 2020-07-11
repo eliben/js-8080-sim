@@ -51,6 +51,20 @@ describe('sim', () => {
     assert.equal(state.a, 0x35);
   });
 
+  it('movsub', () => {
+    let [state, mem] = runProg(`
+      mvi a, 20
+      mvi b, 5
+
+      sub b
+      sbi 7
+      hlt
+      `);
+
+    assert.ok(state.halted);
+    assert.equal(state.a, 8);
+  });
+
   it('jzlabel', () => {
     let [state, mem] = runProg(`
       mvi a, 1h
