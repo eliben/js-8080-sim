@@ -402,4 +402,17 @@ There:  mvi a, 30
     assert.ok(state.halted);
     assert.equal(state.a, 0b10101111);
   });
+
+  it('bitwise-xor', () => {
+    let [state, mem] = runProg(`
+       mvi a, 10000001b
+       mvi b, 11111111b
+       xra b
+       xri 00111100b
+       hlt
+      `);
+
+    assert.ok(state.halted);
+    assert.equal(state.a, 0b01000010);
+  });
 });
