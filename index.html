@@ -11,27 +11,34 @@
     background-color: #d4eed4;
   }
   #status {
-    width: 240px;
+    padding-top: 10px;
+    width: 440px;
   }
+  /* 
+  #control, #control td {
+    border: 1px solid black;
+  }
+  */
 </style>
 <body>
-<table>
+<table id="control">
   <tr>
-    <td><button id="run">Run code</button></td>
-    <td><div id="status"></div></td>
+    <td><button id="run">Run</button> Max steps: <input size="6" id="maxsteps"></input></td>
     <td><button id="clear">Clear</button></td>
+  </tr>
+  <tr>
+    <td colspan="2"><div id="status"></div></td>
   </tr>
 </table>
 <hr/>
-<table id="codetable">
+<table id="main">
   <tr>
     <th>Code</th>
-    <th>RAM</th>
     <th id="spacerheader"></th>
-    <th>Result</th>
+    <th>CPU State and RAM</th>
   </tr>
   <tr>
-    <th><textarea id="codetext" name="codetext" rows="30" cols="62"></textarea>
+    <th><textarea id="codetext" name="codetext" rows="30" cols="42" spellcheck="false"></textarea>
   </tr>
 </table>
 

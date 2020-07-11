@@ -4,35 +4,65 @@ const STORAGE_ID = 'js8080sim';
 
 // Set up listeners.
 const codetext = document.querySelector('#codetext');
+const maxsteps = document.querySelector('#maxsteps');
 codetext.addEventListener('keydown', codetextKey);
 
 document.querySelector("#run").addEventListener("mousedown", runCode);
 
 loadState();
 
-let st = document.querySelector("#status");
-st.textContent = "SUCCESS";
-st.style.color = "green";
-
 function loadState() {
   let state = JSON.parse(localStorage.getItem(STORAGE_ID));
   if (state) {
     codetext.value = state['codetext'];
+    maxsteps.value = state['maxsteps'];
+  } else {
+    maxsteps.value = "10000";
   }
+
+  setStatusReady();
 }
 
 function saveState() {
-  let state = {'codetext': codetext.value};
+  let state = {
+    'codetext': codetext.value,
+    'maxsteps': maxsteps.value
+  };
   localStorage.setItem(STORAGE_ID, JSON.stringify(state));
 }
 
-// TODO: editing -- same whitespace offset as last line
+function setStatusFail(msg) {
+  let st = document.querySelector("#status");
+  st.textContent = "FAIL: " + msg;
+  st.style.color = "red";
+}
+
+function setStatusSuccess() {
+  let st = document.querySelector("#status");
+  st.textContent = "SUCCESS";
+  st.style.color = "green";
+}
+
+function setStatusReady() {
+  let st = document.querySelector("#status");
+  st.textContent = "Ready to run";
+}
+
 function runCode() {
   saveState();
 
-  let prog = codetext.value;
-  let [state, mem] = runProg(prog, 100);
-  console.log(state);
+  try {
+    let prog = codetext.value;
+
+    if (maxsteps.value === 'undefined' || isNaN(parseInt(maxsteps.value))) {
+      throw new Error(`Max steps value is invalid`);
+    }
+    let [state, mem] = runProg(prog, parseInt(maxsteps.value));
+    console.log(state);
+    setStatusSuccess();
+  } catch (e) {
+    setStatusFail(e.message);
+  }
 }
 
 function codetextKey(event) {
