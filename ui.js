@@ -2,10 +2,13 @@
 
 const STORAGE_ID = 'js8080sim';
 
-
-loadState();
+// Set up listeners.
+const codetext = document.querySelector('#codetext');
+codetext.addEventListener('keydown', codetextKey);
 
 document.querySelector("#run").addEventListener("mousedown", runCode);
+
+loadState();
 
 let st = document.querySelector("#status");
 st.textContent = "SUCCESS";
@@ -14,12 +17,12 @@ st.style.color = "green";
 function loadState() {
   let state = JSON.parse(localStorage.getItem(STORAGE_ID));
   if (state) {
-    document.querySelector("#codetext").value = state['codetext'];
+    codetext.value = state['codetext'];
   }
 }
 
 function saveState() {
-  let state = {'codetext': document.querySelector('#codetext').value};
+  let state = {'codetext': codetext.value};
   localStorage.setItem(STORAGE_ID, JSON.stringify(state));
 }
 
@@ -27,9 +30,38 @@ function saveState() {
 function runCode() {
   saveState();
 
-  let prog = document.querySelector('#codetext').value;
+  let prog = codetext.value;
   let [state, mem] = runProg(prog, 100);
   console.log(state);
+}
+
+function codetextKey(event) {
+  if (event.keyCode == 13) {
+    // Capture "Enter" to insert spaces similar to the previous line.
+    let pos = codetext.selectionStart;
+
+    let prevNewlinePos = pos - 1;
+    while (prevNewlinePos > 0 &&
+           codetext.value.charAt(prevNewlinePos) !== '\n') {
+      prevNewlinePos--;
+    }
+
+    let startLinePos = prevNewlinePos + 1;
+    while (codetext.value.charAt(startLinePos) === ' ') {
+      startLinePos++;
+    }
+
+    let numSpaces = startLinePos - prevNewlinePos - 1;
+
+    codetext.value = codetext.value.substring(0, pos)
+                      + '\n'
+                      + ' '.repeat(numSpaces)
+                      + codetext.value.substring(pos, codetext.value.length);
+    codetext.selectionStart = pos + numSpaces + 1;
+    codetext.selectionEnd = pos + numSpaces + 1;
+    event.stopPropagation();
+    event.preventDefault();
+  }
 }
 
 function runProg(progText, maxSteps) {
