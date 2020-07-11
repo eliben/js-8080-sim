@@ -131,7 +131,16 @@ class Assembler {
         let imm = this._argImm(sl, sl.args[0]);
         return [0b11000110, imm];
       }
-        // TODO: test at least of couple of these?
+      case 'ana': {
+        this._expectArgsCount(sl, 1);
+        let r = this._argR(sl, sl.args[0]);
+        return [0b10100000 | r];
+      }
+      case 'ani': {
+        this._expectArgsCount(sl, 1);
+        let imm = this._argImm(sl, sl.args[0]);
+        return [0b11100110, imm];
+      }
       case 'call':
       case 'cc':
       case 'cnc':
@@ -247,6 +256,16 @@ class Assembler {
         this._expectArgsCount(sl, 0);
         return [0b00000000];
       }
+      case 'ora': {
+        this._expectArgsCount(sl, 1);
+        let r = this._argR(sl, sl.args[0]);
+        return [0b10110000 | r];
+      }
+      case 'ori': {
+        this._expectArgsCount(sl, 1);
+        let imm = this._argImm(sl, sl.args[0]);
+        return [0b11110110, imm];
+      }
       case 'pchl': {
         this._expectArgsCount(sl, 0);
         return [0b11101001];
@@ -279,6 +298,22 @@ class Assembler {
           ie = 0b11000000 | (this._translateCCC(ccc, sl) << 3);
         }
         return [ie];
+      }
+      case 'ral': {
+        this._expectArgsCount(sl, 0);
+        return [0b00010111];
+      }
+      case 'rar': {
+        this._expectArgsCount(sl, 0);
+        return [0b00011111];
+      }
+      case 'rlc': {
+        this._expectArgsCount(sl, 0);
+        return [0b00000111];
+      }
+      case 'rrc': {
+        this._expectArgsCount(sl, 0);
+        return [0b00001111];
       }
       case 'shld': {
         this._expectArgsCount(sl, 1);
@@ -316,6 +351,16 @@ class Assembler {
         this._expectArgsCount(sl, 1);
         let imm = this._argImm(sl, sl.args[0]);
         return [0b11010110, imm];
+      }
+      case 'xra': {
+        this._expectArgsCount(sl, 1);
+        let r = this._argR(sl, sl.args[0]);
+        return [0b10101000 | r];
+      }
+      case 'xri': {
+        this._expectArgsCount(sl, 1);
+        let imm = this._argImm(sl, sl.args[0]);
+        return [0b11101110, imm];
       }
       default:
         this._assemblyError(sl.pos, `unknown instruction ${sl.instr}`);

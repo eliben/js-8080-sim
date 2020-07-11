@@ -376,4 +376,30 @@ There:  mvi a, 30
     assert.ok(state.halted);
     assert.equal(state.c, 20);
   });
+
+  it('bitwise-and', () => {
+    let [state, mem] = runProg(`
+       mvi a, 11111111b
+       mvi b, 11101110b
+       ani 11111101b
+       ana b
+       hlt
+      `);
+
+    assert.ok(state.halted);
+    assert.equal(state.a, 0b11101100);
+  });
+
+  it('bitwise-or', () => {
+    let [state, mem] = runProg(`
+       mvi a, 10000001b
+       mvi b, 10101010b
+       ori 100b
+       ora b
+       hlt
+      `);
+
+    assert.ok(state.halted);
+    assert.equal(state.a, 0b10101111);
+  });
 });
