@@ -2,7 +2,7 @@
   "name": "js-8080-sim",
   "version": "1.0.0",
   "description": "8080 assembler and simulator",
-  "main": "src/assembler.js",
+  "main": "src/bundleMain.js",
   "scripts": {
     "test": "mocha"
   },
