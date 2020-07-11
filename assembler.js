@@ -180,17 +180,11 @@ class Assembler {
         this._argLabel(sl, sl.args[0], curAddr);
 
         let ie = 0;
-        switch (sl.instr.toLowerCase()) {
-          case 'jc':  ie = 0b11011010; break;
-          case 'jmp': ie = 0b11000011; break;
-          case 'jnc': ie = 0b11010010; break;
-          case 'jz':  ie = 0b11001010; break;
-          case 'jnz': ie = 0b11000010; break;
-          case 'jp':  ie = 0b11110010; break;
-          case 'jpo': ie = 0b11100010; break;
-          case 'jpe': ie = 0b11101010; break;
-          default:
-            this._assemblyError(sl.pos, `unknown instruction ${sl.instr}`);
+        if (sl.instr.toLowerCase() === 'jmp') {
+          ie = 0b11000011;
+        } else {
+          let ccc = sl.instr.toLowerCase().slice(1);
+          ie = 0b11000010 | (this._translateCCC(ccc, sl) << 3);
         }
         return [ie, 0, 0];
       }
@@ -399,6 +393,22 @@ class Assembler {
       return NaN;
     } else {
       return parseInt(n, base);
+    }
+  }
+
+  // Translates the CCC (condition code) ending to its binary encoding.
+  _translateCCC(ccc, sl) {
+    switch (ccc) {
+      case 'nz': return 0b000;
+      case 'z':  return 0b001;
+      case 'nc': return 0b010;
+      case 'c':  return 0b011;
+      case 'po': return 0b100;
+      case 'pe': return 0b101;
+      case 'p':  return 0b110;
+      case 'm':  return 0b111;
+      default:
+        this._assemblyError(sl.pos, `unknown CCC ending ${ccc}`);
     }
   }
 
