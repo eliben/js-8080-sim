@@ -109,7 +109,8 @@ class Assembler {
     if (this.tracing) {
       console.log('assembling', JSON.stringify(sl));
     }
-    switch (sl.instr.toLowerCase()) {
+    const instrName = sl.instr.toLowerCase();
+    switch (instrName) {
       case 'adc': {
         this._expectArgsCount(sl, 1);
         let r = this._argR(sl, sl.args[0]);
@@ -130,6 +131,7 @@ class Assembler {
         let imm = this._argImm(sl, sl.args[0]);
         return [0b11000110, imm];
       }
+        // TODO: test at least of couple of these?
       case 'call':
       case 'cc':
       case 'cnc':
@@ -143,10 +145,10 @@ class Assembler {
         this._argLabel(sl, sl.args[0], curAddr);
 
         let ie = 0;
-        if (sl.instr.toLowerCase() === 'call') {
+        if (instrName === 'call') {
           ie = 0b11001101;
         } else {
-          let ccc = sl.instr.toLowerCase().slice(1);
+          let ccc = instrName.slice(1);
           ie = 0b11000100 | (this._translateCCC(ccc, sl) << 3);
         }
         return [ie, 0, 0];
@@ -197,10 +199,10 @@ class Assembler {
         this._argLabel(sl, sl.args[0], curAddr);
 
         let ie = 0;
-        if (sl.instr.toLowerCase() === 'jmp') {
+        if (instrName === 'jmp') {
           ie = 0b11000011;
         } else {
-          let ccc = sl.instr.toLowerCase().slice(1);
+          let ccc = instrName.slice(1);
           ie = 0b11000010 | (this._translateCCC(ccc, sl) << 3);
         }
         return [ie, 0, 0];
