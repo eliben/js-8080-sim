@@ -5,8 +5,12 @@ const {Assembler} = require('./assembler.js');
 const CPU8080 = require('./sim8080');
 
 let mult = `
+            mvi b, 44
+            mvi c, 55
+            call Multiply
+            hlt
+            
 ; multiplies b by c, puts result in hl
-
 Multiply:   push psw            ; save registers
             push bc
 
@@ -23,7 +27,6 @@ MultLoop:   dad bc
             dcr a
             jnz MultLoop
 
-            lxi bc, 3040h
 AllDone:    pop  bc
             pop psw
             ret
@@ -49,7 +52,7 @@ let loadadd16bit = `
   hlt
 `;
 
-let prog = loadadd16bit;
+let prog = mult;
 
 let p = new Parser();
 let sl = p.parse(prog);
@@ -70,7 +73,7 @@ function memoryAt(addr) {
 CPU8080.init(memoryTo, memoryAt);
 CPU8080.set('PC', 0);
 
-let N = 100;
+let N = 10000;
 
 // TODO: note, 0x00 is NOPs, so it will just keep executing.
 for (let i = 0; i < N; i++) {

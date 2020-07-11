@@ -156,4 +156,37 @@ describe('sim', () => {
     assert.equal(state.h, 0x57);
     assert.equal(state.l, 0x9b);
   });
+
+  it('mult', () => {
+    let [state, mem] = runProg(`
+            mvi b, 44
+            mvi c, 55
+            call Multiply
+            hlt
+            
+; multiplies b by c, puts result in hl
+Multiply:   push psw            ; save registers
+            push bc
+
+            mvi h, 00h
+            mvi l, 00h
+
+            mov a,b          ; the multiplier goes in a
+            cpi 00h          ; if it's 0, we're finished
+            jz AllDone
+
+            mvi b,00h
+
+MultLoop:   dad bc
+            dcr a
+            jnz MultLoop
+
+AllDone:    pop  bc
+            pop psw
+            ret
+    `);
+
+    assert.ok(state.halted);
+    assert.equal(state.h * 256 + state.l, 44 * 55);
+  });
 });
