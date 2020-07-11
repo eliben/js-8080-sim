@@ -1,0 +1,36 @@
+<!doctype html>
+<style>
+  #spacerheader {
+    width: 60px;
+  }
+  th, td {
+    text-align: left;
+    padding-left: 15px;
+  }
+  .stored {
+    background-color: #d4eed4;
+  }
+  #status {
+    width: 240px;
+  }
+</style>
+
+<body>
+<table>
+  <tr>
+    <td><button id="run">Run code</button></td>
+    <td><div id="status"></div></td>
+    <td><button id="clear">Clear</button></td>
+  </tr>
+</table>
+<hr/>
+<table id="codetable">
+  <tr>
+    <th>Addr</th>
+    <th>RAM</th>
+    <th id="spacerheader"></th>
+    <th>Result</th>
+  </tr>
+</table>
+<script src="js8080simBundle.js"></script>
+</body>
