@@ -294,4 +294,86 @@ There:  mvi a, 30
     assert.ok(state.halted);
     assert.equal(state.a, 30);
   });
+
+  it('cond-call-cnz-yes', () => {
+    // Conditional call with cnz will happen.
+    let [state, mem] = runProg(`
+        mvi b, 5
+        mvi a, 2
+        dcr a
+        cnz BAdder
+        hlt
+
+        ; This function increments b
+    BAdder:
+        inr b
+        ret
+      `);
+
+    assert.ok(state.halted);
+    assert.equal(state.b, 6);
+  });
+
+  it('cond-call-cnz-no', () => {
+    // Conditional call with cnz will not happen.
+    let [state, mem] = runProg(`
+        mvi b, 5
+        mvi a, 1
+        dcr a
+        cnz BAdder
+        hlt
+
+        ; This function increments b
+    BAdder:
+        inr b
+        ret
+      `);
+
+    assert.ok(state.halted);
+    assert.equal(state.b, 5);
+  });
+
+  it('cond-ret-rz-first', () => {
+    // First rz in BRet will return.
+    let [state, mem] = runProg(`
+        mvi b, 1
+        call BRet
+        hlt
+
+    BRet:
+        mvi c, 10
+        dcr b
+        rz
+        mvi c, 20
+        dcr b
+        rz
+        mvi c, 99
+        hlt
+      `);
+
+    assert.ok(state.halted);
+    assert.equal(state.c, 10);
+  });
+
+  it('cond-ret-rz-second', () => {
+    // First rz in BRet will not return, but the second will.
+    let [state, mem] = runProg(`
+        mvi b, 2
+        call BRet
+        hlt
+
+    BRet:
+        mvi c, 10
+        dcr b
+        rz
+        mvi c, 20
+        dcr b
+        rz
+        mvi c, 99
+        hlt
+      `);
+
+    assert.ok(state.halted);
+    assert.equal(state.c, 20);
+  });
 });

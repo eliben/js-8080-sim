@@ -261,9 +261,24 @@ class Assembler {
         let rp = this._argRP(sl, sl.args[0]);
         return [0b11000101 | (rp << 4)];
       }
-      case 'ret': {
+      case 'rc':
+      case 'ret': 
+      case 'rnc':
+      case 'rnz':
+      case 'rm':
+      case 'rp':
+      case 'rpe':
+      case 'rpo':
+      case 'rz': {
         this._expectArgsCount(sl, 0);
-        return [0b11001001];
+        let ie = 0;
+        if (instrName === 'ret') {
+          ie = 0b11001001;
+        } else {
+          let ccc = instrName.slice(1);
+          ie = 0b11000000 | (this._translateCCC(ccc, sl) << 3);
+        }
+        return [ie];
       }
       case 'shld': {
         this._expectArgsCount(sl, 1);
