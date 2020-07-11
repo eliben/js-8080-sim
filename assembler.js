@@ -152,6 +152,10 @@ class Assembler {
         let rp = this._argRP(sl, sl.args[0]);
         return [0b00001001 | (rp << 4)];
       }
+      case 'db': {
+        // Pseudo-instruction that simply assigns its immediate args to memory.
+        return sl.args.map((arg) => {return this._argImm(sl, arg);});
+      }
       case 'dcr': {
         this._expectArgsCount(sl, 1);
         let r = this._argR(sl, sl.args[0]);
@@ -160,6 +164,11 @@ class Assembler {
       case 'hlt': {
         this._expectArgsCount(sl, 0);
         return [0b01110110];
+      }
+      case 'inr': {
+        this._expectArgsCount(sl, 1);
+        let r = this._argR(sl, sl.args[0]);
+        return [0b00000100 | (r << 3)];
       }
       case 'jc':
       case 'jmp':
@@ -193,6 +202,11 @@ class Assembler {
         // 16-bit immediates encoded litte-endian.
         return [0b00111010, num & 0xff, (num >> 8) & 0xff];
       }
+      case 'ldax': {
+        this._expectArgsCount(sl, 1);
+        let rp = this._argRP(sl, sl.args[0]);
+        return [0b00001010 | (rp << 4)];
+      }
       case 'lhld': {
         this._expectArgsCount(sl, 1);
         let num = this._argImmOrLabel(sl, sl.args[1]);
@@ -202,7 +216,7 @@ class Assembler {
       case 'lxi': {
         this._expectArgsCount(sl, 2);
         let rp = this._argRP(sl, sl.args[0]);
-        let num = this._argImmOrLabel(sl, sl.args[1]);
+        let num = this._argImmOrLabel(sl, sl.args[1], curAddr);
         // 16-bit immediates encoded litte-endian.
         return [0b00000001 | (rp << 4), num & 0xff, (num >> 8) & 0xff];
       }
@@ -217,6 +231,10 @@ class Assembler {
         let r = this._argR(sl, sl.args[0]);
         let imm = this._argImm(sl, sl.args[1]);
         return [0b110 | (r << 3), imm];
+      }
+      case 'nop': {
+        this._expectArgsCount(sl, 0);
+        return [0b00000000];
       }
       case 'pop': {
         this._expectArgsCount(sl, 1);
@@ -233,6 +251,11 @@ class Assembler {
         let num = this._argImmOrLabel(sl, sl.args[1]);
         // 16-bit immediates encoded litte-endian.
         return [0b00110010, num & 0xff, (num >> 8) & 0xff];
+      }
+      case 'stax': {
+        this._expectArgsCount(sl, 1);
+        let rp = this._argRP(sl, sl.args[0]);
+        return [0b00000010 | (rp << 4)];
       }
       case 'shld': {
         this._expectArgsCount(sl, 1);

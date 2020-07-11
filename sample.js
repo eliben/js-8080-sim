@@ -4,47 +4,6 @@ const {Parser} = require('./parser.js');
 const {Assembler} = require('./assembler.js');
 const CPU8080 = require('./sim8080');
 
-let mult = `
-            mvi b, 44
-            mvi c, 55
-            call Multiply
-            hlt
-            
-; multiplies b by c, puts result in hl
-Multiply:   push psw            ; save registers
-            push bc
-
-            mvi h, 00h
-            mvi l, 00h
-
-            mov a,b          ; the multiplier goes in a
-            cpi 00h          ; if it's 0, we're finished
-            jz AllDone
-
-            mvi b,00h
-
-MultLoop:   dad bc
-            dcr a
-            jnz MultLoop
-
-AllDone:    pop  bc
-            pop psw
-            ret
-`;
-
-let testchainjmp = `
-      mvi a, 50
-      mvi b, 20
-      mvi c, 100
-      jmp Uno
-Tres: add b
-      hlt
-Uno:  jmp Dos
-      add c
-Dos:  jmp Tres
-      add c
-`;
-
 let loadadd16bit = `
   lxi hl, 1234h
   lxi bc, 4567h
@@ -52,7 +11,30 @@ let loadadd16bit = `
   hlt
 `;
 
-let prog = mult;
+// TODO: add 'em up
+let trydb = `
+  mvi d, 0
+  lxi bc, myArray
+
+  ; Each iteration: load next item from myArray (until finding 0) into a. Add
+  ; d <- d+a.
+Loop:
+  ldax bc
+  cpi 0
+  jz Done
+  add d
+  mov d, a
+  inr c
+  jmp Loop
+
+Done:
+  hlt
+
+myArray:
+  db 10, 20, 30, 10h, 20h, 0
+`;
+
+let prog = trydb;
 
 let p = new Parser();
 let sl = p.parse(prog);

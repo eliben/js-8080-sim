@@ -189,4 +189,31 @@ AllDone:    pop  bc
     assert.ok(state.halted);
     assert.equal(state.h * 256 + state.l, 44 * 55);
   });
+
+  it('adduparray', () => {
+    let [state, mem] = runProg(`
+      mvi d, 0
+      lxi bc, myArray
+
+      ; Each iteration: load next item from myArray (until finding 0) into a. Add
+      ; d <- d+a.
+    Loop:
+      ldax bc
+      cpi 0
+      jz Done
+      add d
+      mov d, a
+      inr c
+      jmp Loop
+
+    Done:
+      hlt
+
+    myArray:
+      db 10, 20, 30, 10h, 20h, 0
+    `);
+
+    assert.ok(state.halted);
+    assert.equal(state.d, 108);
+  });
 });
