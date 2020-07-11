@@ -142,6 +142,11 @@ class Assembler {
         this._argLabel(sl, sl.args[0], curAddr);
         return [0b11001101, 0, 0];
       }
+      case 'cmp': {
+        this._expectArgsCount(sl, 1);
+        let r = this._argR(sl, sl.args[0]);
+        return [0b10111000 | r];
+      }
       case 'cpi': {
         this._expectArgsCount(sl, 1);
         let imm = this._argImm(sl, sl.args[0]);

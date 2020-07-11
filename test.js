@@ -234,4 +234,34 @@ AllDone:    pop  bc
     assert.ok(state.halted);
     assert.equal(state.d, 108);
   });
+
+  it('adduparray-count', () => {
+    // Similar to adduparray but with some differences:
+    // * accumulation into 'a' using the indirect form of add
+    // * using a counter instead of zero-marker for array end
+    let [state, mem] = runProg(`
+      ; The sum will be accumulated into a
+      mvi a, 0
+      lxi hl, myArray
+
+      ; c is the counter
+      mvi c, 5
+
+    Loop:
+      add m
+      inr l
+      dcr c
+      jz Done
+      jmp Loop
+
+    Done:
+      hlt
+
+    myArray:
+      db 10, 20, 30, 10h, 21h
+    `);
+
+    assert.ok(state.halted);
+    assert.equal(state.a, 109);
+  });
 });

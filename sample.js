@@ -12,14 +12,25 @@ let loadadd16bit = `
 `;
 
 let trydb = `
-  lxi hl, myArray
-  mov b, m
-  inr l
-  mov c m
-  hlt
+      ; The sum will be accumulated into a
+      mvi a, 0
+      lxi hl, myArray
 
-myArray:
-  db 10, 20
+      ; c is the counter
+      mvi c, 5
+
+    Loop:
+      add m
+      inr l
+      dcr c
+      jz Done
+      jmp Loop
+
+    Done:
+      hlt
+
+    myArray:
+      db 10, 20, 30, 10h, 20h
 `;
 
 let prog = trydb;
