@@ -117,10 +117,25 @@ class Assembler {
       console.log('assembling', JSON.stringify(sl));
     }
     switch (sl.instr.toLowerCase()) {
+      case 'adc': {
+        this._expectArgsCount(sl, 1);
+        let r = this._argR(sl, sl.args[0]);
+        return [0b10001000 | r];
+      }
       case 'add': {
         this._expectArgsCount(sl, 1);
         let r = this._argR(sl, sl.args[0]);
         return [0b10000000 | r];
+      }
+      case 'aci': {
+        this._expectArgsCount(sl, 1);
+        let imm = this._argImm(sl, sl.args[0]);
+        return [0b11001110, imm];
+      }
+      case 'adi': {
+        this._expectArgsCount(sl, 1);
+        let imm = this._argImm(sl, sl.args[0]);
+        return [0b11000110, imm];
       }
       case 'call': {
         this._expectArgsCount(sl, 1);
