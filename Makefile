@@ -2,7 +2,7 @@
 
 lint:
 	# jshint uses .jshintignore and .jshintrc
-	jshint sim8080.js .
+	jshint .
 
 test:
 	npm test

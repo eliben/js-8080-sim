@@ -2,9 +2,9 @@
 
 const assert = require('assert').strict;
 
-const {Parser} = require('./parser.js');
-const {Assembler} = require('./assembler.js');
-const CPU8080 = require('./sim8080');
+const {Parser} = require('../src/parser.js');
+const {Assembler} = require('../src/assembler.js');
+const CPU8080 = require('../src/sim8080');
 
 
 // runProg runs the assembly program in progText and returns a pair of
