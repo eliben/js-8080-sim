@@ -9,9 +9,16 @@ codetext.addEventListener('keydown', codetextKey);
 
 document.querySelector("#run").addEventListener("mousedown", runCode);
 
-loadState();
+const cpuStateTable = document.querySelector('#state');
+const registers = ['a', 'b', 'c', 'd', 'e',
+                   'h', 'l', 'pc', 'sp', 'halted']
+let cpuStateValues;
 
-function loadState() {
+// TODO: add entries to cpuStateTable for the registers and their values
+
+loadUiState();
+
+function loadUiState() {
   let state = JSON.parse(localStorage.getItem(STORAGE_ID));
   if (state) {
     codetext.value = state['codetext'];
@@ -23,7 +30,7 @@ function loadState() {
   setStatusReady();
 }
 
-function saveState() {
+function saveUiState() {
   let state = {
     'codetext': codetext.value,
     'maxsteps': maxsteps.value
@@ -49,7 +56,7 @@ function setStatusReady() {
 }
 
 function runCode() {
-  saveState();
+  saveUiState();
 
   try {
     let prog = codetext.value;
