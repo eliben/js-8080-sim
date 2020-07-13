@@ -9,12 +9,26 @@ codetext.addEventListener('keydown', codetextKey);
 
 document.querySelector("#run").addEventListener("mousedown", runCode);
 
-const cpuStateTable = document.querySelector('#state');
+const cpuStateTable = document.querySelector('#cpuState');
 const registers = ['a', 'b', 'c', 'd', 'e',
                    'h', 'l', 'pc', 'sp', 'halted']
-let cpuStateValues;
+let cpuStateValues = {};
 
-// TODO: add entries to cpuStateTable for the registers and their values
+let row;
+for (let i = 0; i < registers.length; i++) {
+  if (i % 5 == 0) {
+    row = elt("tr");
+  }
+
+  let regname = registers[i];
+  cpuStateValues[regname] = document.createTextNode("");
+  row.appendChild(elt("td", `${regname}:`));
+  row.appendChild(elt("td", cpuStateValues[regname]));
+
+  if (i % 5 == 4) {
+    cpuStateTable.appendChild(row);
+  }
+}
 
 loadUiState();
 
@@ -125,4 +139,13 @@ function runProg(progText, maxSteps) {
   }
 
   return [js8080sim.CPU8080.status(), mem];
+}
+
+function elt(type, ...children) {
+  let node = document.createElement(type);
+  for (let child of children) {
+    if (typeof child != "string") node.appendChild(child);
+    else node.appendChild(document.createTextNode(child));
+  }
+  return node;
 }

@@ -19,6 +19,21 @@
     border: 1px solid black;
   }
   */
+
+  #cpuState {
+    table-layout: fixed;
+  }
+
+  #cpuState tr td {
+    min-width: 30px;
+  }
+  
+  /*
+  #cpuState, #cpuState td {
+    border: 1px solid black;
+  }
+  */
+  
 </style>
 <body>
 <table id="control">
@@ -39,6 +54,7 @@
   </tr>
   <tr>
     <td><textarea id="codetext" name="codetext" rows="30" cols="42" spellcheck="false"></textarea></td>
+    <td></td>
     <td style="vertical-align: top;">
       <table id="cpuState">
       </table>
