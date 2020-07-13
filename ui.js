@@ -12,6 +12,19 @@ document.querySelector("#run").addEventListener("mousedown", runCode);
 const cpuStateTable = document.querySelector('#cpuState');
 const registers = ['a', 'b', 'c', 'd', 'e',
                    'h', 'l', 'pc', 'sp', 'halted']
+const registerWidths = {
+  'a': 2,
+  'b': 2,
+  'c': 2,
+  'd': 2,
+  'e': 2,
+  'h': 2,
+  'l': 2,
+  'pc': 4,
+  'sp': 4,
+  'halted': 1
+};
+
 let cpuStateValues = {};
 
 let row;
@@ -86,8 +99,10 @@ function runCode() {
     for (let regName of Object.keys(state)) {
       if (cpuStateValues.hasOwnProperty(regName)) {
         let valueElement = cpuStateValues[regName];
-        console.log(valueElement);
-        valueElement.textContent = state[regName].toString(16).padStart(4, 0);
+        let width = registerWidths[regName];
+        valueElement.textContent = state[regName].toString(16).padStart(width, 0);
+      } else if (regName === 'f') {
+        // TODO: handle flags?
       } else {
         console.log('cannot find state value for', regName);
       }
