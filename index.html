@@ -6,9 +6,6 @@
   #spacerow {
     height: 30px;
   }
-  .stored {
-    background-color: #d4eed4;
-  }
   #status {
     padding-top: 10px;
     width: 440px;
@@ -29,11 +26,20 @@
     table-layout: fixed;
   }
 
+  #flags {
+    font-family: "Lucida Console", Courier, monospace;
+    table-layout: fixed;
+  }
+
   #ram td {
     padding: 2px;
   }
 
   #cpuState tr td {
+    min-width: 40px;
+  }
+
+  #flags td {
     min-width: 40px;
   }
 
@@ -44,9 +50,20 @@
   }
 
   td.ramHeader {
-    background-color: #ffffc1;
+    background-color: #cde9fa;
     font-weight: bold;
     text-align: right;
+  }
+
+  td.flagHeader {
+    background-color: #feeeb6;
+    font-weight: bold;
+    text-align: right;
+  }
+
+  .headerRow {
+    text-align: center;
+    font-weight: bold;
   }
 
  /*
@@ -70,10 +87,10 @@
   <tr>
     <th>Code</th>
     <th id="spacerheader"></th>
-    <th>CPU State and RAM</th>
+    <th>CPU State</th>
   </tr>
   <tr>
-    <td><textarea id="codetext" name="codetext" rows="30" cols="60" spellcheck="false"></textarea></td>
+    <td><textarea id="codetext" name="codetext" rows="40" cols="60" spellcheck="false"></textarea></td>
     <td></td>
     <td style="vertical-align: top;">
       <table>
@@ -81,6 +98,17 @@
           <td><div><table id="cpuState"></table></div></td>
         </tr>
         <tr id="spacerow">
+        </tr>
+        <tr class="headerRow">
+          <td>Flags</td>
+        </tr>
+        <tr>
+          <td><table id="flags"></table></td>
+        </tr>
+        <tr id="spacerow">
+        </tr>
+        <tr class="headerRow">
+          <td>RAM</td>
         </tr>
         <tr>
           <td><table id="ram"></table></td>

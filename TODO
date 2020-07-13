@@ -1,3 +1,5 @@
+* Show assembled labels?
+
 * CPU8080 has global state, which sucks. Refactor it, but after I have it
   working to avoid distraction.
 

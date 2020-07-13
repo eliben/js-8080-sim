@@ -45,11 +45,26 @@ for (let i = 0; i < registers.length; i++) {
   }
 }
 
+// Create and populate the flags table.
+let flags = ['Sign', 'Zero', 'Parity', 'Carry'];
+let flagsStateValues = {};
+
+let flagRow = elt("tr");
+for (let i = 0; i < flags.length; i++) {
+  let flagname = flags[i];
+  let headtd = elt("td", flagname + ':');
+  headtd.classList.add("flagHeader");
+  flagsStateValues[flagname] = document.createTextNode("");
+  flagRow.appendChild(headtd);
+  flagRow.appendChild(elt("td", flagsStateValues[flagname]));
+}
+document.querySelector('#flags').appendChild(flagRow);
+
 // Create and populate the RAM table.
 const ramTable = document.querySelector('#ram');
 let headrow = elt("tr", elt("td"));
 for (let i = 0; i < 16; i++) {
-  let headtd = elt("td", `${i.toString(16)}`);
+  let headtd = elt("td", `${formatNum(i, 0)}`);
   headtd.classList.add("ramHeader");
   headrow.appendChild(headtd);
 }
@@ -59,7 +74,7 @@ const NROWS = 16;
 let ramValues = [];
 for (let i = 0; i < NROWS; i++) {
   let row = elt("tr");
-  let headtd = elt("td", `${i.toString(16).padStart(3, 0)}`);
+  let headtd = elt("td", `${formatNum(i, 3)}`);
   headtd.classList.add("ramHeader");
   row.appendChild(headtd);
 
@@ -126,9 +141,13 @@ function runCode() {
       if (cpuStateValues.hasOwnProperty(regName)) {
         let valueElement = cpuStateValues[regName];
         let width = registerWidths[regName];
-        valueElement.textContent = state[regName].toString(16).padStart(width, 0);
+        valueElement.textContent = formatNum(state[regName], width);
       } else if (regName === 'f') {
-        // TODO: handle flags?
+        let regval = state[regName];
+        flagsStateValues['Sign'].textContent = formatNum((regval >> 7) & 0x01, 2);
+        flagsStateValues['Zero'].textContent = formatNum((regval >> 6) & 0x01, 2);
+        flagsStateValues['Parity'].textContent = formatNum((regval >> 2) & 0x01, 2);
+        flagsStateValues['Carry'].textContent = formatNum(regval & 0x01, 2);
       } else {
         console.log('cannot find state value for', regName);
       }
@@ -136,7 +155,7 @@ function runCode() {
 
     // Populate RAM.
     for (let i = 0; i < 16 * 16; i++) {
-      ramValues[i].textContent = `${mem[i].toString(16).padStart(2, 0)}`;
+      ramValues[i].textContent = `${formatNum(mem[i], 2)}`;
     }
 
     setStatusSuccess();
@@ -207,4 +226,10 @@ function elt(type, ...children) {
     else node.appendChild(document.createTextNode(child));
   }
   return node;
+}
+
+// formatNum formats a number as a hexadecimal string with zero padding.
+// Set padding to 0 for "no padding".
+function formatNum(n, padding) {
+  return n.toString(16).toUpperCase().padStart(padding, 0);
 }
