@@ -22,7 +22,9 @@ for (let i = 0; i < registers.length; i++) {
 
   let regname = registers[i];
   cpuStateValues[regname] = document.createTextNode("");
-  row.appendChild(elt("td", `${regname}:`));
+  let nameElem = elt("td", `${regname}:`);
+  nameElem.classList.add("regName");
+  row.appendChild(nameElem);
   row.appendChild(elt("td", cpuStateValues[regname]));
 
   if (i % 5 == 4) {
@@ -79,6 +81,18 @@ function runCode() {
       throw new Error(`Max steps value is invalid`);
     }
     let [state, mem] = runProg(prog, parseInt(maxsteps.value));
+
+    console.log(state, typeof state);
+    for (let regName of Object.keys(state)) {
+      if (cpuStateValues.hasOwnProperty(regName)) {
+        let valueElement = cpuStateValues[regName];
+        console.log(valueElement);
+        valueElement.textContent = state[regName].toString(16).padStart(4, 0);
+      } else {
+        console.log('cannot find state value for', regName);
+      }
+    }
+
     console.log(state);
     setStatusSuccess();
   } catch (e) {
