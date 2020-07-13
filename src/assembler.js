@@ -95,6 +95,7 @@ class Assembler {
           let vals = this.memory.slice(user.addr, user.addr + 3).map(
             (val) => {return val.toString(16);});
 
+          console.log(user);
           console.log(`applied fixup at 0x${user.addr.toString(16)}: [${vals}]`);
         }
       }
@@ -218,7 +219,7 @@ class Assembler {
       }
       case 'lda': {
         this._expectArgsCount(sl, 1);
-        let num = this._argImmOrLabel(sl, sl.args[1]);
+        let num = this._argImmOrLabel(sl, sl.args[0], curAddr);
         // 16-bit immediates encoded litte-endian.
         return [0b00111010, num & 0xff, (num >> 8) & 0xff];
       }
@@ -229,7 +230,7 @@ class Assembler {
       }
       case 'lhld': {
         this._expectArgsCount(sl, 1);
-        let num = this._argImmOrLabel(sl, sl.args[1]);
+        let num = this._argImmOrLabel(sl, sl.args[1], curAddr);
         // 16-bit immediates encoded litte-endian.
         return [0b00101010, num & 0xff, (num >> 8) & 0xff];
       }
@@ -317,13 +318,13 @@ class Assembler {
       }
       case 'shld': {
         this._expectArgsCount(sl, 1);
-        let num = this._argImmOrLabel(sl, sl.args[1]);
+        let num = this._argImmOrLabel(sl, sl.args[1], curAddr);
         // 16-bit immediates encoded litte-endian.
         return [0b00100010, num & 0xff, (num >> 8) & 0xff];
       }
       case 'sta': {
         this._expectArgsCount(sl, 1);
-        let num = this._argImmOrLabel(sl, sl.args[1]);
+        let num = this._argImmOrLabel(sl, sl.args[1], curAddr);
         // 16-bit immediates encoded litte-endian.
         return [0b00110010, num & 0xff, (num >> 8) & 0xff];
       }

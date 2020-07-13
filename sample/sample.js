@@ -6,9 +6,14 @@ const {Assembler} = require('../src/assembler.js');
 const CPU8080 = require('../src/sim8080');
 
 let prog = `
-       mvi a, 11101110b
-       rlc
-       hlt
+  lxi hl, myArray
+  mvi m, 33
+  mvi a, 55
+  lda myArray
+  hlt
+
+myArray:
+  db 00
 `;
 
 let p = new Parser();

@@ -188,6 +188,22 @@ describe('sim', () => {
     assert.equal(state.c, 20);
   });
 
+  it('movindirect-store', () => {
+    let [state, mem] = runProg(`
+      lxi hl, myArray
+      mvi m, 33
+      mvi a, 55
+      lda myArray
+      hlt
+
+    myArray:
+      db 00
+    `);
+
+    assert.ok(state.halted);
+    assert.equal(state.a, 33);
+  });
+
   it('mult', () => {
     let [state, mem] = runProg(`
             mvi b, 44
