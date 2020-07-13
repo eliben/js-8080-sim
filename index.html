@@ -3,10 +3,13 @@
   #spacerheader {
     width: 30px;
   }
-  th, td {
+  #spacerow {
+    height: 30px;
+  }
+  /*th, td {
     text-align: left;
     padding-left: 15px;
-  }
+  }*/
   .stored {
     background-color: #d4eed4;
   }
@@ -25,6 +28,11 @@
     table-layout: fixed;
   }
 
+  #ram {
+    font-family: "Lucida Console", Courier, monospace;
+    table-layout: fixed;
+  }
+
   #cpuState tr td {
     min-width: 40px;
   }
@@ -33,6 +41,11 @@
     background-color: #ffffc1;
     text-align: right;
     font-weight: bold;
+  }
+
+  td.ramHeader {
+    font-weight: bold;
+    text-align: right;
   }
 
  /*
@@ -56,13 +69,21 @@
   <tr>
     <th>Code</th>
     <th id="spacerheader"></th>
-    <th>CPU State</th>
+    <th>CPU State and RAM</th>
   </tr>
   <tr>
     <td><textarea id="codetext" name="codetext" rows="30" cols="48" spellcheck="false"></textarea></td>
     <td></td>
     <td style="vertical-align: top;">
-      <table id="cpuState">
+      <table>
+        <tr>
+          <td><div><table id="cpuState"></table></div></td>
+        </tr>
+        <tr id="spacerow">
+        </tr>
+        <tr>
+          <td><div><table id="ram"></table></div></td>
+        </tr>
       </table>
     </td>
   </tr>

@@ -6,9 +6,9 @@ const STORAGE_ID = 'js8080sim';
 const codetext = document.querySelector('#codetext');
 const maxsteps = document.querySelector('#maxsteps');
 codetext.addEventListener('keydown', codetextKey);
-
 document.querySelector("#run").addEventListener("mousedown", runCode);
 
+// Create and populate the CPU state table.
 const cpuStateTable = document.querySelector('#cpuState');
 const registers = ['a', 'b', 'c', 'd', 'e',
                    'h', 'l', 'pc', 'sp', 'halted']
@@ -43,6 +43,32 @@ for (let i = 0; i < registers.length; i++) {
   if (i % 5 == 4) {
     cpuStateTable.appendChild(row);
   }
+}
+
+// Create and populate the RAM table.
+const ramTable = document.querySelector('#ram');
+let headrow = elt("tr", elt("td"));
+for (let i = 0; i < 16; i++) {
+  let headtd = elt("td", `${i.toString(16)}`);
+  headtd.classList.add("ramHeader");
+  headrow.appendChild(headtd);
+}
+ramTable.appendChild(headrow);
+
+const NROWS = 16;
+let ramValues = [];
+for (let i = 0; i < NROWS; i++) {
+  let row = elt("tr");
+  let headtd = elt("td", `${i.toString(16).padStart(3, 0)}`);
+  headtd.classList.add("ramHeader");
+  row.appendChild(headtd);
+
+  for (let i = 0; i < 16; i++) {
+    let ramval = document.createTextNode("00");
+    ramValues.push(ramval);
+    row.appendChild(elt("td", ramval));
+  }
+  ramTable.appendChild(row);
 }
 
 loadUiState();
@@ -95,6 +121,7 @@ function runCode() {
     }
     let [state, mem] = runProg(prog, parseInt(maxsteps.value));
 
+    // Populate CPU state / registers.
     for (let regName of Object.keys(state)) {
       if (cpuStateValues.hasOwnProperty(regName)) {
         let valueElement = cpuStateValues[regName];
@@ -105,6 +132,11 @@ function runCode() {
       } else {
         console.log('cannot find state value for', regName);
       }
+    }
+
+    // Populate RAM.
+    for (let i = 0; i < 16 * 16; i++) {
+      ramValues[i].textContent = `${mem[i].toString(16).padStart(2, 0)}`;
     }
 
     setStatusSuccess();
