@@ -95,7 +95,6 @@ function runCode() {
     }
     let [state, mem] = runProg(prog, parseInt(maxsteps.value));
 
-    console.log(state, typeof state);
     for (let regName of Object.keys(state)) {
       if (cpuStateValues.hasOwnProperty(regName)) {
         let valueElement = cpuStateValues[regName];
@@ -108,7 +107,6 @@ function runCode() {
       }
     }
 
-    console.log(state);
     setStatusSuccess();
   } catch (e) {
     setStatusFail(e.message);
