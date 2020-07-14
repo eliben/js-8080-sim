@@ -31,6 +31,11 @@
     table-layout: fixed;
   }
 
+  #labels {
+    font-family: "Lucida Console", Courier, monospace;
+    table-layout: fixed;
+  }
+
   #ram td {
     padding: 2px;
   }
@@ -43,10 +48,16 @@
     min-width: 40px;
   }
 
+  td.labelName {
+    background-color: #f3dcfa;
+    font-weight: bold;
+    min-width: 120px;
+  }
+
   td.regName {
     background-color: #ffffc1;
-    text-align: right;
     font-weight: bold;
+    text-align: right;
   }
 
   td.ramHeader {
@@ -90,7 +101,23 @@
     <th>CPU State</th>
   </tr>
   <tr>
-    <td><textarea id="codetext" name="codetext" rows="40" cols="60" spellcheck="false"></textarea></td>
+    <td>
+      <table>
+        <tr>
+          <td>
+            <textarea id="codetext" name="codetext" rows="36" cols="60" spellcheck="false"></textarea>
+          </td>
+        <tr id="spacerow"></tr>
+        <tr>
+          <td class="headerRow">Labels</td>
+        </tr>
+        <tr>
+          <td>
+            <table id="labels"></table>
+          </td>
+        </tr>
+      </table>
+    </td>
     <td></td>
     <td style="vertical-align: top;">
       <table>

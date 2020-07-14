@@ -134,7 +134,7 @@ function runCode() {
     if (maxsteps.value === 'undefined' || isNaN(parseInt(maxsteps.value))) {
       throw new Error(`Max steps value is invalid`);
     }
-    let [state, mem] = runProg(prog, parseInt(maxsteps.value));
+    let [state, mem, labelToAddr] = runProg(prog, parseInt(maxsteps.value));
 
     // Populate CPU state / registers.
     for (let regName of Object.keys(state)) {
@@ -158,9 +158,22 @@ function runCode() {
       ramValues[i].textContent = `${formatNum(mem[i], 2)}`;
     }
 
+    // Populate labels table.
+    const labelTable = document.querySelector('#labels');
+    labelTable.innerHTML = '';
+    for (let [key, value] of labelToAddr.entries()) {
+      let row = elt("tr");
+      let keyCol = elt("td", key + ':');
+      keyCol.classList.add("labelName");
+      let valCol = elt("td", formatNum(value, 4));
+      row.append(keyCol, valCol);
+      labelTable.appendChild(row);
+    }
+
     setStatusSuccess();
   } catch (e) {
     setStatusFail(e.message);
+    throw(e);
   }
 }
 
@@ -197,7 +210,7 @@ function runProg(progText, maxSteps) {
   let p = new js8080sim.Parser();
   let asm = new js8080sim.Assembler();
   let sourceLines = p.parse(progText);
-  let mem = asm.assemble(sourceLines);
+  let [mem, labelToAddr] = asm.assemble(sourceLines);
 
   const memoryTo = (addr, value) => {mem[addr] = value;};
   const memoryAt = (addr) => {return mem[addr];};
@@ -216,7 +229,7 @@ function runProg(progText, maxSteps) {
     }
   }
 
-  return [js8080sim.CPU8080.status(), mem];
+  return [js8080sim.CPU8080.status(), mem, labelToAddr];
 }
 
 function elt(type, ...children) {
