@@ -20,7 +20,8 @@ let p = new Parser();
 let sl = p.parse(prog);
 let asm = new Assembler();
 asm.setTracing(true);
-let mem = asm.assemble(sl);
+let [mem, labelToAddr] = asm.assemble(sl);
+console.log(labelToAddr);
 
 // Set up memory access functions for the simulator.
 function memoryTo(addr, value) {

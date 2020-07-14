@@ -16,7 +16,7 @@ function runProg(progText, maxSteps) {
   let p = new Parser();
   let asm = new Assembler();
   let sourceLines = p.parse(progText);
-  let mem = asm.assemble(sourceLines);
+  let [mem, labelToAddr] = asm.assemble(sourceLines);
 
   const memoryTo = (addr, value) => {mem[addr] = value;};
   const memoryAt = (addr) => {return mem[addr];};
@@ -35,7 +35,7 @@ function runProg(progText, maxSteps) {
     }
   }
 
-  return [CPU8080.status(), mem];
+  return [CPU8080.status(), mem, labelToAddr];
 }
 
 describe('sim', () => {
@@ -119,6 +119,29 @@ describe('sim', () => {
 
     assert.ok(state.halted);
     assert.equal(state.a, 100);
+  });
+
+  it('labels-to-addr', () => {
+    // Verifies that labels have been mapped onto addresses as expected.
+    let [state, mem, labelToAddr] = runProg(`
+    Start:
+          mvi a, 50       ; 2 bytes each
+          mvi b, 20
+          mvi c, 100
+          jmp Uno         ; 3 bytes
+    Tres: add b           ; 1 bytes for add/hlt each
+          hlt
+    Uno:  jmp Dos
+          add c
+    Dos:  jmp Tres
+          add c
+    `);
+    assert.ok(state.halted);
+
+    assert.equal(labelToAddr.get('Start'), 0);
+    assert.equal(labelToAddr.get('Tres'), 9);
+    assert.equal(labelToAddr.get('Uno'), 11);
+    assert.equal(labelToAddr.get('Dos'), 15);
   });
 
   it('chainjmp', () => {

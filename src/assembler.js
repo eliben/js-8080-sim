@@ -31,7 +31,7 @@ class Assembler {
   assemble(sourceLines) {
     this._assembleInstructions(sourceLines);
     this._applyFixups();
-    return this.memory;
+    return [this.memory, this.labelToAddr];
   }
 
   // Set tracing mode: true or false;
