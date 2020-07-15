@@ -11,7 +11,9 @@ const CPU8080 = require('../src/sim8080');
 // [cpu state, memory map] after the program halts.
 // If maxSteps is provided, runs up to maxSteps steps (otherwise a default upper
 // limit is applied to avoid hanging).
-// TODO: it sucks that CPU8080 manipulates global state; fix it.
+//
+// Note: CPU8080 uses global state. It's important to call init() every time
+// we start a new simulation. Multiple simulations cannot run concurrently.
 function runProg(progText, maxSteps) {
   let p = new Parser();
   let asm = new Assembler();
