@@ -4,5 +4,6 @@
 
     // environments
     "node": true,
+    "browser": true,
     "mocha": true
 }

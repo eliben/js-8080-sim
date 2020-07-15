@@ -1,5 +1,9 @@
 'use strict';
 
+// This is for jshint that will worry it can't find js8080sim, which is injected
+// in a <script> tag in the HTML.
+/* globals js8080sim: false */
+
 const STORAGE_ID = 'js8080sim';
 
 // Set up listeners.
@@ -11,7 +15,7 @@ document.querySelector("#run").addEventListener("mousedown", runCode);
 // Create and populate the CPU state table.
 const cpuStateTable = document.querySelector('#cpuState');
 const registers = ['a', 'b', 'c', 'd', 'e',
-                   'h', 'l', 'pc', 'sp', 'halted']
+                   'h', 'l', 'pc', 'sp', 'halted'];
 const registerWidths = {
   'a': 2,
   'b': 2,
@@ -91,8 +95,8 @@ loadUiState();
 function loadUiState() {
   let state = JSON.parse(localStorage.getItem(STORAGE_ID));
   if (state) {
-    codetext.value = state['codetext'];
-    maxsteps.value = state['maxsteps'];
+    codetext.value = state.codetext;
+    maxsteps.value = state.maxsteps;
   } else {
     maxsteps.value = "10000";
   }
@@ -144,10 +148,10 @@ function runCode() {
         valueElement.textContent = formatNum(state[regName], width);
       } else if (regName === 'f') {
         let regval = state[regName];
-        flagsStateValues['Sign'].textContent = formatNum((regval >> 7) & 0x01, 2);
-        flagsStateValues['Zero'].textContent = formatNum((regval >> 6) & 0x01, 2);
-        flagsStateValues['Parity'].textContent = formatNum((regval >> 2) & 0x01, 2);
-        flagsStateValues['Carry'].textContent = formatNum(regval & 0x01, 2);
+        flagsStateValues.Sign.textContent = formatNum((regval >> 7) & 0x01, 2);
+        flagsStateValues.Zero.textContent = formatNum((regval >> 6) & 0x01, 2);
+        flagsStateValues.Parity.textContent = formatNum((regval >> 2) & 0x01, 2);
+        flagsStateValues.Carry.textContent = formatNum(regval & 0x01, 2);
       } else {
         console.log('cannot find state value for', regName);
       }
@@ -195,10 +199,10 @@ function codetextKey(event) {
 
     let numSpaces = startLinePos - prevNewlinePos - 1;
 
-    codetext.value = codetext.value.substring(0, pos)
-                      + '\n'
-                      + ' '.repeat(numSpaces)
-                      + codetext.value.substring(pos, codetext.value.length);
+    codetext.value = codetext.value.substring(0, pos) +
+                      '\n' +
+                      ' '.repeat(numSpaces) +
+                      codetext.value.substring(pos, codetext.value.length);
     codetext.selectionStart = pos + numSpaces + 1;
     codetext.selectionEnd = pos + numSpaces + 1;
     event.stopPropagation();
