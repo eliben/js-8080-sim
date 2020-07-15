@@ -352,6 +352,10 @@ class Assembler {
         let imm = this._argImm(sl, sl.args[0]);
         return [0b11010110, imm];
       }
+      case 'xchg': {
+        this._expectArgsCount(sl, 0);
+        return [0b11101011];
+      }
       case 'xra': {
         this._expectArgsCount(sl, 1);
         let r = this._argR(sl, sl.args[0]);

@@ -469,4 +469,19 @@ There:  mvi a, 30
     assert.equal(state.a, 0b01110111, 'a');
     assert.equal(state.b, 0b11011101, 'b');
   });
+
+  it('xchg', () => {
+    let [state, mem] = runProg(`
+      lxi hl, 1234h
+      lxi de, 4567h
+      xchg
+      hlt
+      `);
+
+    assert.ok(state.halted);
+    assert.equal(state.h, 0x45);
+    assert.equal(state.l, 0x67);
+    assert.equal(state.d, 0x12);
+    assert.equal(state.e, 0x34);
+  });
 });
