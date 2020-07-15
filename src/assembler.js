@@ -197,7 +197,7 @@ class Assembler {
       case 'dcx': {
         this._expectArgsCount(sl, 1);
         let rp = this._argRP(sl, sl.args[0]);
-        return [0b00001011 | (rp << 4)]
+        return [0b00001011 | (rp << 4)];
       }
       case 'hlt': {
         this._expectArgsCount(sl, 0);
@@ -211,7 +211,7 @@ class Assembler {
       case 'inx': {
         this._expectArgsCount(sl, 1);
         let rp = this._argRP(sl, sl.args[0]);
-        return [0b00000011 | (rp << 4)]
+        return [0b00000011 | (rp << 4)];
       }
       case 'jc':
       case 'jm':

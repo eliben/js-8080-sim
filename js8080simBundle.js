@@ -163,6 +163,14 @@ class Assembler {
         }
         return [ie, 0, 0];
       }
+      case 'cma': {
+        this._expectArgsCount(sl, 0);
+        return [0b00101111];
+      }
+      case 'cmc': {
+        this._expectArgsCount(sl, 0);
+        return [0b00111111];
+      }
       case 'cmp': {
         this._expectArgsCount(sl, 1);
         let r = this._argR(sl, sl.args[0]);
@@ -187,6 +195,11 @@ class Assembler {
         let r = this._argR(sl, sl.args[0]);
         return [0b00000101 | (r << 3)];
       }
+      case 'dcx': {
+        this._expectArgsCount(sl, 1);
+        let rp = this._argRP(sl, sl.args[0]);
+        return [0b00001011 | (rp << 4)];
+      }
       case 'hlt': {
         this._expectArgsCount(sl, 0);
         return [0b01110110];
@@ -195,6 +208,11 @@ class Assembler {
         this._expectArgsCount(sl, 1);
         let r = this._argR(sl, sl.args[0]);
         return [0b00000100 | (r << 3)];
+      }
+      case 'inx': {
+        this._expectArgsCount(sl, 1);
+        let rp = this._argRP(sl, sl.args[0]);
+        return [0b00000011 | (rp << 4)];
       }
       case 'jc':
       case 'jm':
@@ -316,11 +334,25 @@ class Assembler {
         this._expectArgsCount(sl, 0);
         return [0b00001111];
       }
+      case 'sbb': {
+        this._expectArgsCount(sl, 1);
+        let r = this._argR(sl, sl.args[0]);
+        return [0b10011000 | r];
+      }
+      case 'sbi': {
+        this._expectArgsCount(sl, 1);
+        let imm = this._argImm(sl, sl.args[0]);
+        return [0b11011110, imm];
+      }
       case 'shld': {
         this._expectArgsCount(sl, 1);
         let num = this._argImmOrLabel(sl, sl.args[1], curAddr);
         // 16-bit immediates encoded litte-endian.
         return [0b00100010, num & 0xff, (num >> 8) & 0xff];
+      }
+      case 'sphl': {
+        this._expectArgsCount(sl, 0);
+        return [0b11111001];
       }
       case 'sta': {
         this._expectArgsCount(sl, 1);
@@ -333,15 +365,9 @@ class Assembler {
         let rp = this._argRP(sl, sl.args[0]);
         return [0b00000010 | (rp << 4)];
       }
-      case 'sbb': {
-        this._expectArgsCount(sl, 1);
-        let r = this._argR(sl, sl.args[0]);
-        return [0b10011000 | r];
-      }
-      case 'sbi': {
-        this._expectArgsCount(sl, 1);
-        let imm = this._argImm(sl, sl.args[0]);
-        return [0b11011110, imm];
+      case 'stc': {
+        this._expectArgsCount(sl, 0);
+        return [0b00110111];
       }
       case 'sub': {
         this._expectArgsCount(sl, 1);
@@ -353,6 +379,10 @@ class Assembler {
         let imm = this._argImm(sl, sl.args[0]);
         return [0b11010110, imm];
       }
+      case 'xchg': {
+        this._expectArgsCount(sl, 0);
+        return [0b11101011];
+      }
       case 'xra': {
         this._expectArgsCount(sl, 1);
         let r = this._argR(sl, sl.args[0]);
@@ -362,6 +392,10 @@ class Assembler {
         this._expectArgsCount(sl, 1);
         let imm = this._argImm(sl, sl.args[0]);
         return [0b11101110, imm];
+      }
+      case 'xthl': {
+        this._expectArgsCount(sl, 0);
+        return [0b11100011];
       }
       default:
         this._assemblyError(sl.pos, `unknown instruction ${sl.instr}`);
