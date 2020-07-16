@@ -548,37 +548,37 @@ There:  mvi a, 30
   it('memcpy', () => {
     // memcpy example from Wikipedia, rewritten to our assembly style.
     let [state, mem, labelToAddr] = runProg(`
-  lxi de, SourceArray
-  lxi hl, TargetArray
-  mvi b, 0
-  mvi c, 5
-  call memcpy
-  hlt
+      lxi de, SourceArray
+      lxi hl, TargetArray
+      mvi b, 0
+      mvi c, 5
+      call memcpy
+      hlt
 
-SourceArray:
-  db 11h, 22h, 33h, 44h, 55h
+    SourceArray:
+      db 11h, 22h, 33h, 44h, 55h
 
-TargetArray:
-  db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    TargetArray:
+      db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
-  ; bc: number of bytes to copy
-  ; de: source block
-  ; hl: target block
-memcpy:
-  mov     a,b         ;Copy register B to register A
-  ora     c           ;Bitwise OR of A and C into register A
-  rz                  ;Return if the zero-flag is set high.
-loop:
-  ldax    de          ;Load A from the address pointed by DE
-  mov     m,a         ;Store A into the address pointed by HL
-  inx     de          ;Increment DE
-  inx     hl          ;Increment HL
-  dcx     bc          ;Decrement BC   (does not affect Flags)
-  mov     a,b         ;Copy B to A    (so as to compare BC with zero)
-  ora     c           ;A = A | C      (set zero)
-  jnz     loop        ;Jump to 'loop:' if the zero-flag is not set.
-  ret                 ;Return
-`);
+      ; bc: number of bytes to copy
+      ; de: source block
+      ; hl: target block
+    memcpy:
+      mov     a,b         ;Copy register B to register A
+      ora     c           ;Bitwise OR of A and C into register A
+      rz                  ;Return if the zero-flag is set high.
+    loop:
+      ldax    de          ;Load A from the address pointed by DE
+      mov     m,a         ;Store A into the address pointed by HL
+      inx     de          ;Increment DE
+      inx     hl          ;Increment HL
+      dcx     bc          ;Decrement BC   (does not affect Flags)
+      mov     a,b         ;Copy B to A    (so as to compare BC with zero)
+      ora     c           ;A = A | C      (set zero)
+      jnz     loop        ;Jump to 'loop:' if the zero-flag is not set.
+      ret                 ;Return
+  `);
 
     assert.ok(state.halted);
     assert.equal(mem[labelToAddr.get('TargetArray')], 0x11);
@@ -586,5 +586,40 @@ loop:
     assert.equal(mem[labelToAddr.get('TargetArray') + 2], 0x33);
     assert.equal(mem[labelToAddr.get('TargetArray') + 3], 0x44);
     assert.equal(mem[labelToAddr.get('TargetArray') + 4], 0x55);
+  });
+
+  it('subroutine-pass-arg-pointer', () => {
+    // Example from the 8080 programming manual; passing the arguments pointer
+    // to a subroutine in h:l.
+    // ADSUB expects the address of a three-byte parameter list in the H:L
+    // registers. It adds the first and second bytes of the list and stores
+    // the result in the third byte of the list.
+    let [state, mem, labelToAddr] = runProg(`
+      lxi h, plist
+      call ADSUB
+
+      lxi h, list2
+      call ADSUB
+      hlt
+
+    plist: db 6, 8, 0
+    list2: db 10, 35, 0
+
+    ADSUB:
+      mov a, m
+      inx h
+      mov b, m
+      add b
+      inx h
+      mov m, a
+      ret
+    `);
+
+    assert.ok(state.halted);
+    let plist = labelToAddr.get('plist');
+    let list2 = labelToAddr.get('list2');
+
+    assert.equal(mem[plist + 2], 6 + 8);
+    assert.equal(mem[list2 + 2], 10 + 35);
   });
 });
