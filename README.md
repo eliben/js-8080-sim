@@ -7,8 +7,6 @@ command line (on Node.js) or in the browser, with a simple UI):
   <img src="https://github.com/eliben/js-8080-sim/blob/master/doc/js-sim-screenshot.png?raw=true">
 </p>
 
-A live version can be played with at http://eliben.org/js8080
-
 ## How it works
 
 The code for the assembler and simulator is in the `src/` directory.
@@ -25,7 +23,12 @@ BSD license.
 For an example of using the assembler and simulator from the command line, see
 `sample/sample.js`.
 
-## Bundling for the browser
+## Web UI
+
+The web UI has no server component; it runs purely in your browser and doesn't
+make any HTTP requests. It does use the browser's local storage to save the last
+program you ran, for convenience. You can play with a live version here:
+http://eliben.org/js8080 
 
 js-8080-sim uses `browserify`; see `Makefile` for the invocation.
 
