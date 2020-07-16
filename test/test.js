@@ -170,7 +170,7 @@ describe('sim', () => {
       mvi c, 22
       call Sub
       hlt
-      
+
         ; This subroutine adds b into c, and clobbers a.
     Sub:
       mov a, b
@@ -235,7 +235,7 @@ describe('sim', () => {
             mvi c, 55
             call Multiply
             hlt
-            
+
 ; multiplies b by c, puts result in hl
 Multiply:   push psw            ; save registers
             push bc
@@ -509,6 +509,51 @@ There:  mvi a, 30
     assert.ok(state.halted);
     assert.equal(state.d, 0x21);
     assert.equal(state.e, 0xff);
+  });
+
+  it('memcpy', () => {
+    // memcpy example from Wikipedia, rewritten to our assembly style.
+    let [state, mem, labelToAddr] = runProg(`
+  lxi de, SourceArray
+  lxi hl, TargetArray
+  mvi b, 0
+  mvi c, 5
+  call memcpy
+  hlt
+
+SourceArray:
+  db 11h, 22h, 33h, 44h, 55h
+
+TargetArray:
+  db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+  ; bc: number of bytes to copy
+  ; de: source block
+  ; hl: target block
+memcpy:
+  mov     a,b         ;Copy register B to register A
+  ora     c           ;Bitwise OR of A and C into register A
+  rz                  ;Return if the zero-flag is set high.
+loop:
+  ldax    de          ;Load A from the address pointed by DE
+  mov     m,a         ;Store A into the address pointed by HL
+  inx     de          ;Increment DE
+  inx     hl          ;Increment HL
+  dcx     bc          ;Decrement BC   (does not affect Flags)
+  mov     a,b         ;Copy B to A    (so as to compare BC with zero)
+  ora     c           ;A = A | C      (set zero)
+  jnz     loop        ;Jump to 'loop:' if the zero-flag is not set.
+  ret                 ;Return
+`);
+
+    assert.ok(state.halted);
+    console.log(mem);
+
+    assert.equal(mem[labelToAddr.get('TargetArray')], 0x11);
+    assert.equal(mem[labelToAddr.get('TargetArray') + 1], 0x22);
+    assert.equal(mem[labelToAddr.get('TargetArray') + 2], 0x33);
+    assert.equal(mem[labelToAddr.get('TargetArray') + 3], 0x44);
+    assert.equal(mem[labelToAddr.get('TargetArray') + 4], 0x55);
   });
 
 });
