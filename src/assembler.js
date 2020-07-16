@@ -411,12 +411,10 @@ class Assembler {
   // Expect arg to be a register pair and return its encoding.
   _argRP(sl, arg) {
     switch (arg.toLowerCase()) {
-      case 'bc': return 0b00;
-      case 'de': return 0b01;
-      case 'hl': return 0b10;
-      case 'sp':
-      case 'psw':
-        return 0b11;
+      case 'bc': case 'b': return 0b00;
+      case 'de': case 'd': return 0b01;
+      case 'hl': case 'h': return 0b10;
+      case 'sp': case 'psw': return 0b11;
       default:
         this._assemblyError(sl.pos, `invalid register pair ${arg}`);
     }

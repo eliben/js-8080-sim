@@ -487,6 +487,24 @@ There:  mvi a, 30
     assert.equal(state.e, 0x34);
   });
 
+  it('rp-single-char-ref', () => {
+    // Test that referring to register pairs by the name of the first register
+    // in the pair works OK.
+    let [state, mem] = runProg(`
+      lxi h, 1234h
+      lxi d, 4567h
+      lxi b, abcdh
+      hlt
+      `);
+    assert.ok(state.halted);
+    assert.equal(state.h, 0x12);
+    assert.equal(state.l, 0x34);
+    assert.equal(state.d, 0x45);
+    assert.equal(state.e, 0x67);
+    assert.equal(state.b, 0xab);
+    assert.equal(state.c, 0xcd);
+  });
+
   it('inx', () => {
     let [state, mem] = runProg(`
       lxi hl, 12ffh
@@ -547,13 +565,10 @@ loop:
 `);
 
     assert.ok(state.halted);
-    console.log(mem);
-
     assert.equal(mem[labelToAddr.get('TargetArray')], 0x11);
     assert.equal(mem[labelToAddr.get('TargetArray') + 1], 0x22);
     assert.equal(mem[labelToAddr.get('TargetArray') + 2], 0x33);
     assert.equal(mem[labelToAddr.get('TargetArray') + 3], 0x44);
     assert.equal(mem[labelToAddr.get('TargetArray') + 4], 0x55);
   });
-
 });
