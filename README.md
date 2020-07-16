@@ -1,5 +1,11 @@
 # js-8080-sim
 
+TODO: screenshot of UI
+Add link to blog post once that's out, for more details.
+Put online on eliben.org somewhere?
+
+TODO: explain contents of directory
+
 ## Bundling for the browser
 
 js-8080-sim uses `browserify`; see `Makefile` for the invocation.

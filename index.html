@@ -1,9 +1,9 @@
 <!doctype html>
 <style>
-  #spacerheader {
+  .spacerheader {
     width: 30px;
   }
-  #spacerow {
+  .spacerrow {
     height: 30px;
   }
   #status {
@@ -97,7 +97,7 @@
 <table id="main">
   <tr>
     <th>Code</th>
-    <th id="spacerheader"></th>
+    <th class="spacerheader"></th>
     <th>CPU State</th>
   </tr>
   <tr>
@@ -107,7 +107,7 @@
           <td>
             <textarea id="codetext" name="codetext" rows="36" cols="60" spellcheck="false"></textarea>
           </td>
-        <tr id="spacerow"></tr>
+        <tr class="spacerrow"></tr>
         <tr>
           <td class="headerRow">Labels</td>
         </tr>
@@ -124,7 +124,7 @@
         <tr>
           <td><div><table id="cpuState"></table></div></td>
         </tr>
-        <tr id="spacerow">
+        <tr class="spacerrow">
         </tr>
         <tr class="headerRow">
           <td>Flags</td>
@@ -132,7 +132,7 @@
         <tr>
           <td><table id="flags"></table></td>
         </tr>
-        <tr id="spacerow">
+        <tr class="spacerrow">
         </tr>
         <tr class="headerRow">
           <td>RAM</td>
