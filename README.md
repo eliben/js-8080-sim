@@ -7,11 +7,23 @@ command line (on Node.js) or in the browser, with a simple UI):
   <img src="https://github.com/eliben/js-8080-sim/blob/master/doc/js-sim-screenshot.png?raw=true">
 </p>
 
-More details on usage will be posted soon.
+A live version can be played with at http://eliben.org/js8080
 
 ## How it works
 
-foog
+The code for the assembler and simulator is in the `src/` directory.
+
+The files `parser.js` and `assembler.js` implement a 8080 assembler. Assemblers
+typically have different syntaxes; this one attempts to remain close to the
+"Intel 8080 Assembly Language Programming Manual" book. Not all directives are
+implemented - PRs welcome!
+
+The file `sim8080.js` is the 8080 simulator; it is forked from
+https://github.com/maly/8080js with some minor tweaks, and retains its original
+BSD license.
+
+For an example of using the assembler and simulator from the command line, see
+`sample/sample.js`.
 
 ## Bundling for the browser
 
