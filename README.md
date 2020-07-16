@@ -4,7 +4,7 @@ Interactive assembler and simulator for the 8080 CPU. Can be used from the
 command line (on Node.js) or in the browser, with a simple UI):
 
 <p align="center">
-  <img src="https://raw.github.com/eliben/js-8080-sim/master/doc/js-sim-screenshot.png">
+  <img src="https://github.com/eliben/js-8080-sim/blob/master/doc/js-sim-screenshot.png?raw=true">
 </p>
 
 More details on usage will be posted soon.
