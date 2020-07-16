@@ -11,6 +11,61 @@ const codetext = document.querySelector('#codetext');
 const maxsteps = document.querySelector('#maxsteps');
 codetext.addEventListener('keydown', codetextKey);
 document.querySelector("#run").addEventListener("mousedown", runCode);
+document.querySelector("#setsample").addEventListener("mousedown", setSample);
+
+let codeSamples = [
+  {'name': 'add-array-indirect',
+   'code': `
+; The sum will be accumulated into d
+  mvi d, 0
+ 
+; Demonstrates indirect addressing, by keeping
+; a "pointer" to myArray in bc.
+  lxi bc, myArray
+
+; Each iteration: load next item from myArray
+; (until finding 0) into a. Then accumulate into d.
+Loop:
+  ldax bc
+  cpi 0
+  jz Done
+  add d
+  mov d, a
+  inr c
+  jmp Loop
+
+Done:
+  hlt
+
+myArray:
+  db 10h, 20h, 30h, 10h, 20h, 0
+`},
+
+  {'name': 'labeljump',
+   'code': `
+  mvi a, 1h
+  dcr a
+  jz YesZero
+  jnz NoZero
+
+YesZero:
+  mvi c, 20
+  hlt
+
+NoZero:
+  mvi c, 50
+  hlt
+`}
+  
+];
+
+// Code samples.
+let samples = document.querySelector("#samples");
+for (let sample of codeSamples) {
+  let option = elt("option", sample.name);
+  option.setAttribute('value', sample.name);
+  samples.appendChild(option);
+}
 
 // Create and populate the CPU state table.
 const cpuStateTable = document.querySelector('#cpuState');
@@ -236,6 +291,12 @@ function runProg(progText, maxSteps) {
   return [js8080sim.CPU8080.status(), mem, labelToAddr];
 }
 
+function setSample() {
+  let samples = document.querySelector("#samples");
+  let selectedSampleCode = codeSamples[samples.selectedIndex];
+  codetext.value = selectedSampleCode.code.replace(/^\n+/, '');
+}
+
 function elt(type, ...children) {
   let node = document.createElement(type);
   for (let child of children) {
@@ -250,3 +311,4 @@ function elt(type, ...children) {
 function formatNum(n, padding) {
   return n.toString(16).toUpperCase().padStart(padding, 0);
 }
+
