@@ -29,6 +29,9 @@ class Assembler {
     this.tracing = false;
   }
 
+  // Assembles the given source lines. Returns [memory, labelToAddr].
+  // memory is the assembled memory array. labelToAddr is a Map object mapping
+  // labels to addresses in memory.
   assemble(sourceLines) {
     this._assembleInstructions(sourceLines);
     this._applyFixups();
@@ -189,6 +192,17 @@ class Assembler {
       case 'db': {
         // Pseudo-instruction that simply assigns its immediate args to memory.
         return sl.args.map((arg) => {return this._argImm(sl, arg);});
+      }
+      case 'dw': {
+        // Pseudo-instruction that treats immediate args as 2-byte words, and
+        // assigns them to memory in little-endian.
+        let enc = [];
+        for (let arg of sl.args) {
+          let argEnc = this._argImm(sl, arg);
+          enc.push(argEnc & 0xFF);
+          enc.push((argEnc >> 8) & 0xFF);
+        }
+        return enc;
       }
       case 'dcr': {
         this._expectArgsCount(sl, 1);
@@ -412,12 +426,10 @@ class Assembler {
   // Expect arg to be a register pair and return its encoding.
   _argRP(sl, arg) {
     switch (arg.toLowerCase()) {
-      case 'bc': return 0b00;
-      case 'de': return 0b01;
-      case 'hl': return 0b10;
-      case 'sp':
-      case 'psw':
-        return 0b11;
+      case 'bc': case 'b': return 0b00;
+      case 'de': case 'd': return 0b01;
+      case 'hl': case 'h': return 0b10;
+      case 'sp': case 'psw': return 0b11;
       default:
         this._assemblyError(sl.pos, `invalid register pair ${arg}`);
     }
