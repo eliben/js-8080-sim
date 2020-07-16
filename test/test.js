@@ -229,6 +229,22 @@ describe('sim', () => {
     assert.equal(state.a, 33);
   });
 
+  it('array-dw', () => {
+    let [state, mem, labelToAddr] = runProg(`
+      hlt
+
+    myArray:
+      dw 2030h, 5060h
+    `);
+
+    assert.ok(state.halted);
+    let arrAddr = labelToAddr.get('myArray');
+    assert.equal(mem[arrAddr], 0x30);
+    assert.equal(mem[arrAddr+1], 0x20);
+    assert.equal(mem[arrAddr+2], 0x60);
+    assert.equal(mem[arrAddr+3], 0x50);
+  });
+
   it('mult', () => {
     let [state, mem] = runProg(`
             mvi b, 44
