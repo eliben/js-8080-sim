@@ -16,6 +16,10 @@
   }
   */
 
+  #codeLabels {
+    table-layout: fixed;
+  }
+
   #cpuState {
     font-family: "Lucida Console", Courier, monospace;
     table-layout: fixed;
@@ -109,7 +113,7 @@
   </tr>
   <tr>
     <td>
-      <table>
+      <table id="codeLabels">
         <tr>
           <td>
             <textarea id="codetext" name="codetext" rows="36" cols="60" spellcheck="false"></textarea>
@@ -146,6 +150,9 @@
         </tr>
         <tr>
           <td><table id="ram"></table></td>
+        </tr>
+        <tr class="headerRow">
+          <td>From address (hex): <input size="4" id="ramstart"></input><button id="showramstart">Show</button></td>
         </tr>
       </table>
     </td>

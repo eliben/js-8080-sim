@@ -9,9 +9,11 @@ const STORAGE_ID = 'js8080sim';
 // Set up listeners.
 const codetext = document.querySelector('#codetext');
 const maxsteps = document.querySelector('#maxsteps');
+const ramstart = document.querySelector('#ramstart');
 codetext.addEventListener('keydown', codetextKey);
 document.querySelector("#run").addEventListener("mousedown", runCode);
 document.querySelector("#setsample").addEventListener("mousedown", setSample);
+document.querySelector("#showramstart").addEventListener("mousedown", showRamStart);
 
 let codeSamples = [
   {'name': 'add-array-indirect',
@@ -183,11 +185,19 @@ loadUiState();
 
 function loadUiState() {
   let state = JSON.parse(localStorage.getItem(STORAGE_ID));
+
+  // Defaults that will be overridden when reading state.
+  maxsteps.value = "10000";
+  ramstart.value = "0000";
+
   if (state) {
     codetext.value = state.codetext;
-    maxsteps.value = state.maxsteps;
-  } else {
-    maxsteps.value = "10000";
+    if (state.maxsteps !== undefined) {
+      maxsteps.value = state.maxsteps;
+    }
+    if (state.ramstart !== undefined) {
+      ramstart.value = state.ramstart;
+    }
   }
 
   setStatusReady();
@@ -218,6 +228,10 @@ function setStatusReady() {
   st.textContent = "Ready to run";
 }
 
+// Saves the mem values from the last run, so we could show different parts of
+// RAM per the user's request in the RAM table.
+let memFromLastRun = [];
+
 function runCode() {
   saveUiState();
 
@@ -228,6 +242,7 @@ function runCode() {
       throw new Error(`Max steps value is invalid`);
     }
     let [state, mem, labelToAddr] = runProg(prog, parseInt(maxsteps.value));
+    memFromLastRun = mem;
 
     // Populate CPU state / registers.
     for (let regName of Object.keys(state)) {
@@ -246,10 +261,10 @@ function runCode() {
       }
     }
 
-    // Populate RAM.
-    for (let i = 0; i < 16 * 16; i++) {
-      ramValues[i].textContent = `${formatNum(mem[i], 2)}`;
-    }
+    // Populate RAM table.
+    ramstart.value = "0000";
+    // TODO: refactor
+    showRamStart();
 
     // Populate labels table.
     const labelTable = document.querySelector('#labels');
@@ -329,6 +344,26 @@ function setSample() {
   let samples = document.querySelector("#samples");
   let selectedSampleCode = codeSamples[samples.selectedIndex];
   codetext.value = selectedSampleCode.code.replace(/^\n+/, '');
+}
+
+// The user clicked the "Show" button for the starting point of RAM display.
+function showRamStart() {
+  // Calculate start address for the first entry in the displayed RAM table.
+  let startAddr = parseInt(ramstart.value, 16) & 0xfff0;
+  let headerStart = startAddr;
+
+  // Set table row headers.
+  for (let i = 1; i < ramTable.children.length; i++) {
+    let headerTd = ramTable.children[i].firstChild;
+    headerTd.textContent = formatNum(headerStart, 4).slice(0, 3);
+    headerStart += 16;
+  }
+
+  // Set table contents.
+  for (let i = 0; i < 16 * 16; i++) {
+    let memIndex = startAddr + i;
+    ramValues[i].textContent = `${formatNum(memFromLastRun[memIndex], 2)}`;
+  }
 }
 
 function elt(type, ...children) {
