@@ -350,6 +350,10 @@ function setSample() {
 function showRamStart() {
   // Calculate start address for the first entry in the displayed RAM table.
   let startAddr = parseInt(ramstart.value, 16) & 0xfff0;
+  if (startAddr > 0xff00) {
+    startAddr = 0xff00;
+    ramstart.value = formatNum(startAddr, 4);
+  }
   let headerStart = startAddr;
 
   // Set table row headers.
@@ -362,7 +366,7 @@ function showRamStart() {
   // Set table contents.
   for (let i = 0; i < 16 * 16; i++) {
     let memIndex = startAddr + i;
-    ramValues[i].textContent = `${formatNum(memFromLastRun[memIndex], 2)}`;
+    ramValues[i].textContent = formatNum(memFromLastRun[memIndex], 2);
   }
 }
 
