@@ -10,12 +10,14 @@ const STORAGE_ID = 'js8080sim';
 const codetext = document.querySelector('#codetext');
 const maxsteps = document.querySelector('#maxsteps');
 const ramstart = document.querySelector('#ramstart');
-codetext.addEventListener('keydown', codetextKey);
-document.querySelector("#run").addEventListener("mousedown", runCode);
-document.querySelector("#setsample").addEventListener("mousedown", setSample);
-document.querySelector("#showramstart").addEventListener("mousedown", showRamStart);
+codetext.addEventListener('keydown', onCodeTextKey);
+document.querySelector("#run").addEventListener("mousedown", onRunCode);
+document.querySelector("#setsample").addEventListener("mousedown", onSetSample);
+document.querySelector("#showramstart").addEventListener("mousedown", onShowRamStart);
 
 let codeSamples = [
+  {'name': '', 'code': ''},
+
   {'name': 'add-array-indirect',
    'code': `
 ; The sum will be accumulated into d
@@ -232,7 +234,7 @@ function setStatusReady() {
 // RAM per the user's request in the RAM table.
 let memFromLastRun = [];
 
-function runCode() {
+function onRunCode() {
   saveUiState();
 
   try {
@@ -263,8 +265,7 @@ function runCode() {
 
     // Populate RAM table.
     ramstart.value = "0000";
-    // TODO: refactor
-    showRamStart();
+    populateRamTable();
 
     // Populate labels table.
     const labelTable = document.querySelector('#labels');
@@ -285,7 +286,7 @@ function runCode() {
   }
 }
 
-function codetextKey(event) {
+function onCodeTextKey(event) {
   if (event.keyCode == 13) {
     // Capture "Enter" to insert spaces similar to the previous line.
     let pos = codetext.selectionStart;
@@ -340,14 +341,17 @@ function runProg(progText, maxSteps) {
   return [js8080sim.CPU8080.status(), mem, labelToAddr];
 }
 
-function setSample() {
+function onSetSample() {
   let samples = document.querySelector("#samples");
   let selectedSampleCode = codeSamples[samples.selectedIndex];
   codetext.value = selectedSampleCode.code.replace(/^\n+/, '');
 }
 
-// The user clicked the "Show" button for the starting point of RAM display.
-function showRamStart() {
+function onShowRamStart() {
+  populateRamTable();
+}
+
+function populateRamTable() {
   // Calculate start address for the first entry in the displayed RAM table.
   let startAddr = parseInt(ramstart.value, 16) & 0xfff0;
   if (startAddr > 0xff00) {
