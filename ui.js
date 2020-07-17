@@ -14,6 +14,7 @@ codetext.addEventListener('keydown', onCodeTextKey);
 document.querySelector("#run").addEventListener("mousedown", onRunCode);
 document.querySelector("#setsample").addEventListener("mousedown", onSetSample);
 document.querySelector("#showramstart").addEventListener("mousedown", onShowRamStart);
+document.querySelector("#ramstart").addEventListener("keyup", onRamStartKey);
 
 let codeSamples = [
   {'name': '', 'code': ''},
@@ -283,6 +284,14 @@ function onRunCode() {
   } catch (e) {
     setStatusFail(e.message);
     throw(e);
+  }
+}
+
+function onRamStartKey(event) {
+  if (event.keyCode == 13) {
+    onShowRamStart();
+    event.stopPropagation();
+    event.preventDefault();
   }
 }
 
