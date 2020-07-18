@@ -564,12 +564,14 @@ module.exports.AssemblyError = AssemblyError;
 // file for use with Browserify (see Makefile).
 'use strict';
 
-const {Parser} = require('../src/parser.js');
-const {Assembler} = require('../src/assembler.js');
+const { Parser, ParseError } = require('../src/parser.js');
+const { Assembler, AssemblyError } = require('../src/assembler.js');
 const CPU8080 = require('../src/sim8080');
 
 module.exports.Assembler = Assembler;
+module.exports.AssemblyError = AssemblyError;
 module.exports.Parser = Parser;
+module.exports.ParseError = ParseError;
 module.exports.CPU8080 = CPU8080;
 
 },{"../src/assembler.js":1,"../src/parser.js":3,"../src/sim8080":4}],3:[function(require,module,exports){
