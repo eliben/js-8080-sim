@@ -28,7 +28,7 @@ For an example of using the assembler and simulator from the command line, see
 The web UI has no server component; it runs purely in your browser and doesn't
 make any HTTP requests. It does use the browser's local storage to save the last
 program you ran, for convenience. You can play with a live version here:
-http://eliben.org/js8080 
+https://eliben.org/js8080 
 
 js-8080-sim uses `browserify`; see `Makefile` for the invocation.
 
