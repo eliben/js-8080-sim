@@ -285,7 +285,6 @@ function onRunCode() {
     if (e instanceof js8080sim.ParseError ||
         e instanceof js8080sim.AssemblyError) {
       setStatusFail(`${e}`);
-      console.log(e.pos);
     } else {
       setStatusFail(e.message);
     }
