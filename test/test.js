@@ -2,8 +2,8 @@
 
 const assert = require('assert').strict;
 
-const {Parser} = require('../src/parser.js');
-const {Assembler} = require('../src/assembler.js');
+const { Parser, ParseError } = require('../src/parser.js');
+const { Assembler } = require('../src/assembler.js');
 const CPU8080 = require('../src/sim8080');
 
 
@@ -39,6 +39,36 @@ function runProg(progText, maxSteps) {
 
   return [CPU8080.status(), mem, labelToAddr];
 }
+
+function expectParseError(code, messageMatchRegex, posMatchFunc) {
+  let gotParseError = false;
+  try {
+    runProg(code);
+  } catch (e) {
+    if (e instanceof ParseError) {
+      assert.match(e.message, messageMatchRegex);
+      assert.ok(posMatchFunc(e.pos), `pos mismatch, got ${e.pos}`);
+      gotParseError = true;
+    } else {
+      assert.fail(`expected ParseError, got ${e}`);
+    }
+  }
+  assert.ok(gotParseError);
+}
+
+describe('parse-errors', () => {
+  it('token-error', () => {
+    expectParseError('mvi a, %%%', /invalid token/, (pos) => {
+      return pos.line == 1;
+    });
+  });
+
+  it('parse-error', () => {
+    expectParseError('\nmvi a, :', /want arg/, (pos) => {
+      return pos.line == 2;
+    });
+  });
+});
 
 describe('sim', () => {
   it('movadd', () => {

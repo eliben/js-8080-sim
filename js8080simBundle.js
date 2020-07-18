@@ -608,14 +608,14 @@ class Lexer {
 
     let c = this.buf[this.pos];
     if (this._isNewline(c)) {
-      let tok = {name: 'NEWLINE', value: c, pos: this._lineCol(this.pos)};
+      let tok = {name: 'NEWLINE', value: c, pos: this._position()};
       this._skipNewlines();
       return tok;
     }
 
     if (this._ops.has(c)) {
       // Known operator.
-      let tok = {name: c, value: c, pos: this._lineCol(this.pos)};
+      let tok = {name: c, value: c, pos: this._position()};
       this.pos++;
       return tok;
     } else {
@@ -624,7 +624,7 @@ class Lexer {
       } else if (c === "'") {
         return this._string();
       } else {
-        throw new Error(`Token error at ${this.pos}`);
+        throw new ParseError(`invalid token`, this._position());
       }
     }
   }
@@ -640,7 +640,7 @@ class Lexer {
       let tok = {
         name: 'LABEL',
         value: this.buf.slice(this.pos, endpos).join(''),
-        pos: this._lineCol(this.pos)
+        pos: this._position()
       };
       this.pos = endpos + 1;
       return tok;
@@ -648,7 +648,7 @@ class Lexer {
       let tok = {
         name: 'ID',
         value: this.buf.slice(this.pos, endpos).join(''),
-        pos: this._lineCol(this.pos)
+        pos: this._position()
       };
       this.pos = endpos;
       return tok;
@@ -660,12 +660,12 @@ class Lexer {
     let end = this.buf.indexOf("'", this.pos + 1);
 
     if (end < 0) {
-      throw new Error(`unterminated quote at ${this.pos}`);
+      throw new ParseError(`unterminated quote`, this._position());
     } else {
       var tok = {
         name: "STRING",
         value: this.buf.slice(this.pos + 1, end),
-        pos: this._lineCol(this.pos)
+        pos: this._position()
       };
       this.pos = end + 1;
       return tok;
@@ -715,8 +715,8 @@ class Lexer {
            c === '.' || c === '_' || c === '$';
   }
 
-  _lineCol(pos) {
-    return new Position(this.lineCount, pos - this.lastNewlinePos);
+  _position() {
+    return new Position(this.lineCount, this.pos - this.lastNewlinePos);
   }
 }
 
@@ -731,6 +731,24 @@ class Position {
   }
 }
 
+// Custom exception type thrown by the parser/lexer.
+class ParseError extends Error {
+  constructor(message, pos) {
+    super(message);
+    this.pos = pos;
+  }
+
+  toString() {
+    return `Parse error at ${this.pos}: ${this.message}`;
+  }
+}
+
+ParseError.prototype.toString = function() {
+    return `Parse error at ${this.position}: ${this.message}`;
+};
+
+// Parser - the main entry point to this file. See comment on top of
+// constructor.
 class Parser {
   constructor() {
   }
@@ -812,12 +830,13 @@ class Parser {
   }
   
   _parseError(pos, msg) {
-    throw new Error(`Parse error at ${pos}: ${msg}`);
+    throw new ParseError(msg, pos);
   }
 }
 
 // Exports.
 module.exports.Parser = Parser;
+module.exports.ParseError = ParseError;
 
 },{}],4:[function(require,module,exports){
 // Forked from https://github.com/maly/8080js with minor tweaks.
