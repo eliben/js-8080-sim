@@ -3,6 +3,18 @@
 
 const MEMORY_SIZE = 64 * 1024;
 
+// Custom exception type thrown by the assembler.
+class AssemblyError extends Error {
+  constructor(message, pos) {
+    super(message);
+    this.pos = pos;
+  }
+
+  toString() {
+    return `Assembly error at ${this.pos}: ${this.message}`;
+  }
+}
+
 class Assembler {
   constructor() {
     // memory is the memory map being build during assembly.
@@ -539,12 +551,13 @@ class Assembler {
   }
 
   _assemblyError(pos, msg) {
-    throw new Error(`Assembly error at ${pos}: ${msg}`);
+    throw new AssemblyError(msg, pos);
   }
 }
 
 // Exports.
 module.exports.Assembler = Assembler;
+module.exports.AssemblyError = AssemblyError;
 
 },{}],2:[function(require,module,exports){
 // Collection of all objects we need in the browser, re-exported from a single

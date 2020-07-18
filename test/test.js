@@ -3,7 +3,7 @@
 const assert = require('assert').strict;
 
 const { Parser, ParseError } = require('../src/parser.js');
-const { Assembler } = require('../src/assembler.js');
+const { Assembler, AssemblyError } = require('../src/assembler.js');
 const CPU8080 = require('../src/sim8080');
 
 
@@ -65,6 +65,30 @@ describe('parse-errors', () => {
 
   it('parse-error', () => {
     expectParseError('\nmvi a, :', /want arg/, (pos) => {
+      return pos.line == 2;
+    });
+  });
+});
+
+function expectAssemblyError(code, messageMatchRegex, posMatchFunc) {
+  let gotAssemblyError = false;
+  try {
+    runProg(code);
+  } catch (e) {
+    if (e instanceof AssemblyError) {
+      assert.match(e.message, messageMatchRegex);
+      assert.ok(posMatchFunc(e.pos), `pos mismatch, got ${e.pos}`);
+      gotAssemblyError = true;
+    } else {
+      assert.fail(`expected AssemblyError, got ${e}`);
+    }
+  }
+  assert.ok(gotAssemblyError);
+}
+
+describe('assembly-error', () => {
+  it('assembly-error', () => {
+    expectAssemblyError('\nmvi a', /want 2 args for mvi/, (pos) => {
       return pos.line == 2;
     });
   });
