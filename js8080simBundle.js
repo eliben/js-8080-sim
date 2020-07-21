@@ -203,7 +203,12 @@ class Assembler {
       }
       case 'db': {
         // Pseudo-instruction that simply assigns its immediate args to memory.
-        return sl.args.map((arg) => {return this._argImm(sl, arg);});
+        if (sl.args.length == 1 && sl.args[0] instanceof Array) {
+          // If 'db' has a single array argument, it comes from a STRING.
+          return sl.args[0].map((c) => {return c.charCodeAt(0);});
+        } else {
+          return sl.args.map((arg) => {return this._argImm(sl, arg);});
+        }
       }
       case 'dw': {
         // Pseudo-instruction that treats immediate args as 2-byte words, and

@@ -10,11 +10,13 @@ const STORAGE_ID = 'js8080sim';
 const codetext = document.querySelector('#codetext');
 const maxsteps = document.querySelector('#maxsteps');
 const ramstart = document.querySelector('#ramstart');
+const ramshowmode = document.querySelector('#ramshowmode');
 codetext.addEventListener('keydown', onCodeTextKey);
 document.querySelector("#run").addEventListener("mousedown", onRunCode);
 document.querySelector("#setsample").addEventListener("mousedown", onSetSample);
 document.querySelector("#showramstart").addEventListener("mousedown", onShowRamStart);
 document.querySelector("#ramstart").addEventListener("keyup", onRamStartKey);
+document.querySelector("#ramshowmode").addEventListener("change", onRamShowMode);
 
 let codeSamples = [
   {'name': '', 'code': ''},
@@ -233,7 +235,7 @@ function setStatusReady() {
 
 // Saves the mem values from the last run, so we could show different parts of
 // RAM per the user's request in the RAM table.
-let memFromLastRun = [];
+let memFromLastRun = new Array(65536).fill(0);
 
 function onRunCode() {
   saveUiState();
@@ -365,6 +367,10 @@ function onShowRamStart() {
   populateRamTable();
 }
 
+function onRamShowMode() {
+  populateRamTable();
+}
+
 function populateRamTable() {
   // Calculate start address for the first entry in the displayed RAM table.
   let startAddr = parseInt(ramstart.value, 16) & 0xfff0;
@@ -381,10 +387,15 @@ function populateRamTable() {
     headerStart += 16;
   }
 
+  const useAscii = ramshowmode.value == "ASCII";
+
   // Set table contents.
   for (let i = 0; i < 16 * 16; i++) {
     let memIndex = startAddr + i;
-    ramValues[i].textContent = formatNum(memFromLastRun[memIndex], 2);
+    let value = memFromLastRun[memIndex];
+    ramValues[i].textContent = useAscii ?
+      ('.' + formatAscii(value)) :
+      formatNum(value, 2);
   }
 }
 
@@ -403,3 +414,14 @@ function formatNum(n, padding) {
   return n.toString(16).toUpperCase().padStart(padding, 0);
 }
 
+// formatAscii formats the numeric code n as ASCII, with special treatment for
+// non-printable characters.
+function formatAscii(n) {
+  let f;
+  if (n >= 33 && n <= 126) {
+    f = String.fromCharCode(n);
+  } else {
+    f = '.';
+  }
+  return f;
+}
