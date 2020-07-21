@@ -705,4 +705,50 @@ There:  mvi a, 30
     assert.equal(mem[plist + 2], 6 + 8);
     assert.equal(mem[list2 + 2], 10 + 35);
   });
+
+  it('capitalize-string', () => {
+    // Function that capitalizes a string; expects string address in HL and its
+    // length in C.
+    let [state, mem, labelToAddr] = runProg(`
+      lxi hl, str
+      mvi c, 14
+      call Capitalize
+      hlt
+
+    Capitalize:
+      mov a, c
+      cpi 0
+      jz AllDone
+      
+      mov a, m
+      cpi 61h
+      jc SkipIt
+      
+      cpi 7bh
+      jnc SkipIt
+      
+      sui 20h
+      mov m, a
+      
+    SkipIt:
+      inx hl
+      dcr c
+      jmp Capitalize
+     
+    AllDone:
+      ret
+
+    str:
+      db 'hello, friends'
+  `);
+
+    assert.ok(state.halted);
+    let str = labelToAddr.get('str');
+
+    let s = '';
+    for (let i = str; i < str + 14; i++) {
+      s += String.fromCharCode(mem[i]);
+    }
+    assert.equal(s, 'HELLO, FRIENDS');
+  });
 });
