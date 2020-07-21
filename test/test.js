@@ -390,6 +390,35 @@ AllDone:    pop  bc
     assert.equal(state.a, 109);
   });
 
+  it('adduparray-string-count', () => {
+    // Like adduparray-count, but the input array is constructed using STRING
+    // syntax.
+    let [state, mem] = runProg(`
+      ; The sum will be accumulated into a
+      mvi a, 0
+      lxi hl, myArray
+
+      ; c is the counter
+      mvi c, 3
+
+    Loop:
+      add m
+      inr l
+      dcr c
+      jz Done
+      jmp Loop
+
+    Done:
+      hlt
+
+    myArray:
+      db 'ABC'
+    `);
+
+    assert.ok(state.halted);
+    assert.equal(state.a, 65 + 66 + 67);
+  });
+
 
   it('pchl', () => {
     let [state, mem] = runProg(`
