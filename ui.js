@@ -12,7 +12,9 @@ const maxsteps = document.querySelector('#maxsteps');
 const ramstart = document.querySelector('#ramstart');
 const ramshowmode = document.querySelector('#ramshowmode');
 codetext.addEventListener('keydown', onCodeTextKey);
-document.querySelector("#run").addEventListener("mousedown", onRunCode);
+document.querySelector("#run").addEventListener("mousedown", () => dispatchStep("run"));
+document.querySelector("#prev").addEventListener("mousedown", () => dispatchStep("prev"));
+document.querySelector("#next").addEventListener("mousedown", () => dispatchStep("next"));
 document.querySelector("#setsample").addEventListener("mousedown", onSetSample);
 document.querySelector("#showramstart").addEventListener("mousedown", onShowRamStart);
 document.querySelector("#ramstart").addEventListener("keyup", onRamStartKey);
@@ -271,52 +273,27 @@ function setStatusReady() {
 // RAM per the user's request in the RAM table.
 let memFromLastRun = new Array(65536).fill(0);
 
-function onRunCode() {
-  saveUiState();
+function checkSteps() {
+    if (maxsteps.value === 'undefined' || isNaN(parseInt(maxsteps.value))
+	|| parseInt(maxsteps.value) < 0) {
+    throw new Error(`Steps value is invalid`);
+  } 
+}
 
+function dispatchStep(event) {
   try {
-    let prog = codetext.value;
-
-    if (maxsteps.value === 'undefined' || isNaN(parseInt(maxsteps.value))) {
-      throw new Error(`Max steps value is invalid`);
+    checkSteps();
+    switch (event) {
+    case "run":
+      onRunCode();
+      break;
+    case "next":
+      onNextStep();
+      break;
+    case "prev":
+      onPrevStep();
+      break;  
     }
-    let [state, mem, labelToAddr] = runProg(prog, parseInt(maxsteps.value));
-    memFromLastRun = mem;
-
-    // Populate CPU state / registers.
-    for (let regName of Object.keys(state)) {
-      if (cpuStateValues.hasOwnProperty(regName)) {
-        let valueElement = cpuStateValues[regName];
-        let width = registerWidths[regName];
-        valueElement.textContent = formatNum(state[regName], width);
-      } else if (regName === 'f') {
-        let regval = state[regName];
-        flagsStateValues.Sign.textContent = formatNum((regval >> 7) & 0x01, 2);
-        flagsStateValues.Zero.textContent = formatNum((regval >> 6) & 0x01, 2);
-        flagsStateValues.Parity.textContent = formatNum((regval >> 2) & 0x01, 2);
-        flagsStateValues.Carry.textContent = formatNum(regval & 0x01, 2);
-      } else {
-        console.log('cannot find state value for', regName);
-      }
-    }
-
-    // Populate RAM table.
-    ramstart.value = "0000";
-    populateRamTable();
-
-    // Populate labels table.
-    const labelTable = document.querySelector('#labels');
-    labelTable.innerHTML = '';
-    for (let [key, value] of labelToAddr.entries()) {
-      let row = elt("tr");
-      let keyCol = elt("td", key + ':');
-      keyCol.classList.add("labelName");
-      let valCol = elt("td", formatNum(value, 4));
-      row.append(keyCol, valCol);
-      labelTable.appendChild(row);
-    }
-
-    setStatusSuccess();
   } catch (e) {
     if (e instanceof js8080sim.ParseError ||
         e instanceof js8080sim.AssemblyError) {
@@ -326,6 +303,62 @@ function onRunCode() {
     }
     throw(e);
   }
+}
+
+function onNextStep() {
+  let step = parseInt(maxsteps.value);
+  maxsteps.value = step + 1;
+  onRunCode();
+}
+
+function onPrevStep() {
+  let step = parseInt(maxsteps.value);
+  maxsteps.value = step - 1;
+  onRunCode();
+}
+
+function onRunCode() {
+  saveUiState();
+
+  let prog = codetext.value;
+
+  let [state, mem, labelToAddr] = runProg(prog, parseInt(maxsteps.value));
+  memFromLastRun = mem;
+
+  // Populate CPU state / registers.
+  for (let regName of Object.keys(state)) {
+    if (cpuStateValues.hasOwnProperty(regName)) {
+      let valueElement = cpuStateValues[regName];
+      let width = registerWidths[regName];
+      valueElement.textContent = formatNum(state[regName], width);
+    } else if (regName === 'f') {
+      let regval = state[regName];
+      flagsStateValues.Sign.textContent = formatNum((regval >> 7) & 0x01, 2);
+      flagsStateValues.Zero.textContent = formatNum((regval >> 6) & 0x01, 2);
+      flagsStateValues.Parity.textContent = formatNum((regval >> 2) & 0x01, 2);
+      flagsStateValues.Carry.textContent = formatNum(regval & 0x01, 2);
+    } else {
+      console.log('cannot find state value for', regName);
+    }
+  }
+
+  // Populate RAM table.
+  ramstart.value = "0000";
+  populateRamTable();
+
+  // Populate labels table.
+  const labelTable = document.querySelector('#labels');
+  labelTable.innerHTML = '';
+  for (let [key, value] of labelToAddr.entries()) {
+    let row = elt("tr");
+    let keyCol = elt("td", key + ':');
+    keyCol.classList.add("labelName");
+    let valCol = elt("td", formatNum(value, 4));
+    row.append(keyCol, valCol);
+    labelTable.appendChild(row);
+  }
+
+  setStatusSuccess();
 }
 
 function onRamStartKey(event) {
