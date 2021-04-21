@@ -27,7 +27,7 @@ let codeSamples = [
    'code': `
 ; The sum will be accumulated into d
   mvi d, 0
- 
+
 ; Demonstrates indirect addressing, by keeping
 ; a "pointer" to myArray in bc.
   lxi bc, myArray
@@ -77,22 +77,22 @@ Capitalize:
   mov a, c
   cpi 0
   jz AllDone
-  
+
   mov a, m
   cpi 61h
   jc SkipIt
-  
+
   cpi 7bh
   jnc SkipIt
-  
+
   sui 20h
   mov m, a
-  
+
 SkipIt:
   inx hl
   dcr c
   jmp Capitalize
- 
+
 AllDone:
   ret
 
@@ -133,7 +133,7 @@ loop:
   jnz     loop        ;Jump to 'loop:' if the zero-flag is not set.
   ret                 ;Return
 `}
-  
+
 ];
 
 // Code samples.
@@ -273,11 +273,12 @@ function setStatusReady() {
 // RAM per the user's request in the RAM table.
 let memFromLastRun = new Array(65536).fill(0);
 
+// Checks if the value in the maxsteps box is valid; throws exception if not.
 function checkSteps() {
-    if (maxsteps.value === 'undefined' || isNaN(parseInt(maxsteps.value))
-	|| parseInt(maxsteps.value) < 0) {
+    if (maxsteps.value === 'undefined' || isNaN(parseInt(maxsteps.value)) ||
+        parseInt(maxsteps.value) < 0) {
     throw new Error(`Steps value is invalid`);
-  } 
+  }
 }
 
 function dispatchStep(event) {
@@ -292,7 +293,7 @@ function dispatchStep(event) {
       break;
     case "prev":
       onPrevStep();
-      break;  
+      break;
     }
   } catch (e) {
     if (e instanceof js8080sim.ParseError ||
