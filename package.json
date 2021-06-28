@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/eliben/js-8080-sim#readme",
   "devDependencies": {
-    "mocha": "^8.0.1"
+    "mocha": "^8.4.0"
   }
 }

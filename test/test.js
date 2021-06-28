@@ -283,6 +283,25 @@ describe('sim', () => {
     assert.equal(state.a, 33);
   });
 
+  it('lda-sta', () => {
+    let [state, mem] = runProg(`
+      lda myArray
+      mov c, a
+      mvi a, 99
+      sta myArray
+
+      mvi a, 0
+      lda myArray
+      hlt
+    myArray:
+      db 33
+    `);
+
+    assert.ok(state.halted);
+    assert.equal(state.c, 33);
+    assert.equal(state.a, 99);
+  });
+
   it('array-dw', () => {
     let [state, mem, labelToAddr] = runProg(`
       hlt

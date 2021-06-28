@@ -386,7 +386,7 @@ class Assembler {
       }
       case 'sta': {
         this._expectArgsCount(sl, 1);
-        let num = this._argImmOrLabel(sl, sl.args[1], curAddr);
+        let num = this._argImmOrLabel(sl, sl.args[0], curAddr);
         // 16-bit immediates encoded litte-endian.
         return [0b00110010, num & 0xff, (num >> 8) & 0xff];
       }
