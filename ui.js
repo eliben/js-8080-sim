@@ -11,7 +11,7 @@ const codetext = document.querySelector('#codetext');
 const maxsteps = document.querySelector('#maxsteps');
 const ramstart = document.querySelector('#ramstart');
 const ramshowmode = document.querySelector('#ramshowmode');
-codetext.addEventListener('keydown', onCodeTextKey);
+//codetext.addEventListener('keydown', onCodeTextKey);
 document.querySelector("#run").addEventListener("mousedown", () => dispatchStep("run"));
 document.querySelector("#prev").addEventListener("mousedown", () => dispatchStep("prev"));
 document.querySelector("#next").addEventListener("mousedown", () => dispatchStep("next"));
@@ -232,7 +232,7 @@ function loadUiState() {
   ramstart.value = "0000";
 
   if (state) {
-    codetext.value = state.codetext;
+    codetext.innerHTML = state.codetext;
     if (state.maxsteps !== undefined) {
       maxsteps.value = state.maxsteps;
     }
@@ -246,7 +246,7 @@ function loadUiState() {
 
 function saveUiState() {
   let state = {
-    'codetext': codetext.value,
+    'codetext': codetext.innerHTML,
     'maxsteps': maxsteps.value
   };
   localStorage.setItem(STORAGE_ID, JSON.stringify(state));
@@ -272,6 +272,7 @@ function setStatusReady() {
 // Saves the mem values from the last run, so we could show different parts of
 // RAM per the user's request in the RAM table.
 let memFromLastRun = new Array(65536).fill(0);
+var globAddrToLine;
 
 // Checks if the value in the maxsteps box is valid; throws exception if not.
 function checkSteps() {
@@ -310,22 +311,47 @@ function onNextStep() {
   let step = parseInt(maxsteps.value);
   maxsteps.value = step + 1;
   onRunCode();
+  highlightCurrentLine();
 }
 
 function onPrevStep() {
   let step = parseInt(maxsteps.value);
   maxsteps.value = step - 1;
   onRunCode();
+  highlightCurrentLine();
+}
+
+function highlightCurrentLine() {
+  let pc = parseInt(cpuStateValues.pc.textContent, 16);
+  let lineno = globAddrToLine[pc];
+  console.log(`Highlighting ${pc} => ${lineno}`);
+  let lines = codetext.innerHTML.split('\n');
+
+  // map the entries to a div to enable styling and track the index if the line contains FAIL
+  lines = lines.map((value, index) => {
+    index += 1;
+    if(index == lineno && ! value.includes("<mark>")){
+      return `<mark>${value}</mark>`;
+    } else if(value.includes("<mark>")) {
+      return value.replace("</mark>", "").replace("<mark>", "");
+    } else {
+      return value;
+    }
+  });
+
+  // put the mapped content back as innerHTML of the PRE element
+  codetext.innerHTML = lines.join("\n");
 }
 
 function onRunCode() {
   saveUiState();
 
-  let prog = codetext.value;
+  let prog = codetext.innerHTML;
 
-  let [state, mem, labelToAddr] = runProg(prog, parseInt(maxsteps.value));
+  let [state, mem, labelToAddr, addrToLine] = runProg(prog, parseInt(maxsteps.value));
   memFromLastRun = mem;
-
+  globAddrToLine = addrToLine;
+  console.log(globAddrToLine);
   // Populate CPU state / registers.
   for (let regName of Object.keys(state)) {
     if (cpuStateValues.hasOwnProperty(regName)) {
@@ -370,6 +396,7 @@ function onRamStartKey(event) {
   }
 }
 
+
 function onCodeTextKey(event) {
   if (event.keyCode == 13) {
     // Capture "Enter" to insert spaces similar to the previous line.
@@ -377,21 +404,21 @@ function onCodeTextKey(event) {
 
     let prevNewlinePos = pos - 1;
     while (prevNewlinePos > 0 &&
-           codetext.value.charAt(prevNewlinePos) !== '\n') {
+           codetext.innerHTML.charAt(prevNewlinePos) !== '\n') {
       prevNewlinePos--;
     }
 
     let startLinePos = prevNewlinePos + 1;
-    while (codetext.value.charAt(startLinePos) === ' ') {
+    while (codetext.innerHTML.charAt(startLinePos) === ' ') {
       startLinePos++;
     }
 
     let numSpaces = startLinePos - prevNewlinePos - 1;
 
-    codetext.value = codetext.value.substring(0, pos) +
+    codetext.innerHTML = codetext.innerHTML.substring(0, pos) +
                       '\n' +
                       ' '.repeat(numSpaces) +
-                      codetext.value.substring(pos, codetext.value.length);
+                      codetext.innerHTML.substring(pos, codetext.innerHTML.length);
     codetext.selectionStart = pos + numSpaces + 1;
     codetext.selectionEnd = pos + numSpaces + 1;
     event.stopPropagation();
@@ -399,11 +426,14 @@ function onCodeTextKey(event) {
   }
 }
 
+
 function runProg(progText, maxSteps) {
+  // we need to clean progText and remove the highlighting
+  progText = progText.replaceAll("<mark>", "").replaceAll("</mark>", "");
   let p = new js8080sim.Parser();
   let asm = new js8080sim.Assembler();
   let sourceLines = p.parse(progText);
-  let [mem, labelToAddr] = asm.assemble(sourceLines);
+  let [mem, labelToAddr, addrToLine] = asm.assemble(sourceLines);
 
   const memoryTo = (addr, value) => {mem[addr] = value;};
   const memoryAt = (addr) => {return mem[addr];};
@@ -422,13 +452,14 @@ function runProg(progText, maxSteps) {
     }
   }
 
-  return [js8080sim.CPU8080.status(), mem, labelToAddr];
+  return [js8080sim.CPU8080.status(), mem, labelToAddr, addrToLine];
 }
 
 function onSetSample() {
   let samples = document.querySelector("#samples");
   let selectedSampleCode = codeSamples[samples.selectedIndex];
-  codetext.value = selectedSampleCode.code.replace(/^\n+/, '');
+  codetext.innerHTML = selectedSampleCode.code.replace(/^\n+/, '');
+  codetext.innerHTML = selectedSampleCode.code.replace(/^\n+/, '');
 }
 
 function onShowRamStart() {

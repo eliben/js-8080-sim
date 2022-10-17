@@ -24,6 +24,9 @@ class Assembler {
     // an entry.
     this.labelToAddr = new Map();
 
+    // Map address to line number
+    this.lineAddressMapping = new Map();
+
     // labelToFixups maps label names to an array of fixup addresses where
     // these labels are requested. This is filled up during assembly when we
     // encounter refereces to labels. In the fixup stage these are applied to
@@ -46,7 +49,7 @@ class Assembler {
   assemble(sourceLines) {
     this._assembleInstructions(sourceLines);
     this._applyFixups();
-    return [this.memory, this.labelToAddr];
+    return [this.memory, this.labelToAddr, this.lineAddressMapping];
   }
 
   // Set tracing mode: true or false;
@@ -77,6 +80,7 @@ class Assembler {
         if (this.tracing) {
           console.log(`0x${curAddr.toString(16)} =>`, encoded.map((e) => e.toString(16)));
         }
+        this.lineAddressMapping[curAddr] = sl.pos.line;
         for (let i = 0; i < encoded.length; i++) {
           this.memory[curAddr++] = encoded[i];
         }
@@ -208,6 +212,7 @@ class Assembler {
         } else {
           return sl.args.map((arg) => {return this._argImm(sl, arg);});
         }
+        throw new Error("Impossible to get here...");
       }
       case 'dw': {
         // Pseudo-instruction that treats immediate args as 2-byte words, and

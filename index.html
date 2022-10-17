@@ -84,6 +84,18 @@
     font-weight: bold;
   }
 
+  pre {
+    font-family:sans;
+    border: 1px solid black;
+    width:400px;
+    min-height:600px;
+    display: inline-block;
+  }
+
+  mark {
+    background:yellow;
+    display:inline-block;
+  }
  /*
   #cpuState, #cpuState td {
     border: 1px solid black;
@@ -123,7 +135,7 @@
       <table id="codeLabels">
         <tr>
           <td>
-            <textarea id="codetext" name="codetext" rows="36" cols="60" spellcheck="false"></textarea>
+            <pre contentEditable="true" id="codetext" name="codetext" rows="36" cols="60" spellcheck="false"></pre>
           </td>
         <tr class="spacerrow"></tr>
         <tr>
