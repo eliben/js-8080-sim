@@ -165,7 +165,7 @@ let cpuStateValues = {};
 
 let row;
 for (let i = 0; i < registers.length; i++) {
-  if (i % 5 == 0) {
+  if (i % 5 === 0) {
     row = elt("tr");
   }
 
@@ -176,7 +176,7 @@ for (let i = 0; i < registers.length; i++) {
   row.appendChild(nameElem);
   row.appendChild(elt("td", cpuStateValues[regname]));
 
-  if (i % 5 == 4) {
+  if (i % 5 === 4) {
     cpuStateTable.appendChild(row);
   }
 }
@@ -226,7 +226,6 @@ loadUiState();
 
 function loadUiState() {
   let state = JSON.parse(localStorage.getItem(STORAGE_ID));
-
   // Defaults that will be overridden when reading state.
   maxsteps.value = "10000";
   ramstart.value = "0000";
@@ -272,7 +271,7 @@ function setStatusReady() {
 // Saves the mem values from the last run, so we could show different parts of
 // RAM per the user's request in the RAM table.
 let memFromLastRun = new Array(65536).fill(0);
-var globAddrToLine;
+let globAddrToLine;
 
 // Checks if the value in the maxsteps box is valid; throws exception if not.
 function checkSteps() {
@@ -330,7 +329,7 @@ function highlightCurrentLine() {
   // map the entries to a div to enable styling and track the index if the line contains FAIL
   lines = lines.map((value, index) => {
     index += 1;
-    if(index == lineno && ! value.includes("<mark>")){
+    if(index === lineno && ! value.includes("<mark>")){
       return `<mark>${value}</mark>`;
     } else if(value.includes("<mark>")) {
       return value.replace("</mark>", "").replace("<mark>", "");
@@ -388,7 +387,7 @@ function onRunCode() {
 }
 
 function onRamStartKey(event) {
-  if (event.keyCode == 13) {
+  if (event.keyCode === 13) {
     onShowRamStart();
     event.stopPropagation();
     event.preventDefault();
@@ -410,9 +409,9 @@ function getCaretCharacterOffsetWithin(element) {
       preCaretRange.setEnd(range.endContainer, range.endOffset);
       caretOffset = preCaretRange.toString().length;
     }
-  } else if ( (sel = doc.selection) && sel.type != "Control") {
-    var textRange = sel.createRange();
-    var preCaretTextRange = doc.body.createTextRange();
+  } else if ( (sel = doc.selection) && sel.type !== "Control") {
+    const textRange = sel.createRange();
+    const preCaretTextRange = doc.body.createTextRange();
     preCaretTextRange.moveToElementText(element);
     preCaretTextRange.setEndPoint("EndToEnd", textRange);
     caretOffset = preCaretTextRange.text.length;
@@ -454,9 +453,9 @@ function createRange(node, chars, range) {
 
 function setCurrentCursorPosition(element, chars) {
   if (chars >= 0) {
-    var selection = window.getSelection();
+    const selection = window.getSelection();
 
-    var range = createRange(element, { count: chars });
+    const range = createRange(element, {count: chars});
 
     if (range) {
       range.collapse(false);
@@ -467,7 +466,7 @@ function setCurrentCursorPosition(element, chars) {
 }
 
 function onCodeTextKey(event) {
-  if (event.keyCode == 13) {
+  if (event.keyCode === 13) {
     // Capture "Enter" to insert spaces similar to the previous line.
     let pos = getCaretCharacterOffsetWithin(codetext);
 
@@ -554,7 +553,7 @@ function populateRamTable() {
     headerStart += 16;
   }
 
-  const useAscii = ramshowmode.value == "ASCII";
+  const useAscii = ramshowmode.value === "ASCII";
 
   // Set table contents.
   for (let i = 0; i < 16 * 16; i++) {
