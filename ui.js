@@ -284,6 +284,7 @@ function setStatusReady() {
 // RAM per the user's request in the RAM table.
 let memFromLastRun = new Array(65536).fill(0);
 var globAddrToLine;
+var highlightedLine = -1;
 
 // Checks if the value in the maxsteps box is valid; throws exception if not.
 function checkSteps() {
@@ -339,14 +340,15 @@ function highlightCurrentLine() {
   let lines = codetext.innerHTML.split('\n');
 
   // map the entries to a div to enable styling and track the index if the line contains FAIL
-  lines = lines.map((value, index) => {
+  lines = lines.map((line, index) => {
     index += 1;
-    if(index == lineno && ! value.includes("<mark>")){
-      return `<mark>${value}</mark>`;
-    } else if(value.includes("<mark>")) {
-      return value.replace("</mark>", "").replace("<mark>", "");
+    if(index == lineno && !isHighlighted(line)){
+      highlightedLine = lineno;
+      return highlight(line, lineno);
+    } else if(isHighlighted(line)) {
+      return unhighlight(line);
     } else {
-      return value;
+      return line;
     }
   });
 
@@ -407,8 +409,7 @@ function onRamStartKey(event) {
 }
 
 // Credits to https://stackoverflow.com/questions/4811822/get-a-ranges-start-and-end-offsets-relative-to-its-parent-container/4812022#4812022
-function getCaretCharacterOffsetWithin(element) {
-  var caretOffset = 0;
+function getCaretPrecedingText(element) {
   var doc = element.ownerDocument || element.document;
   var win = doc.defaultView || doc.parentWindow;
   var sel;
@@ -419,17 +420,34 @@ function getCaretCharacterOffsetWithin(element) {
       var preCaretRange = range.cloneRange();
       preCaretRange.selectNodeContents(element);
       preCaretRange.setEnd(range.endContainer, range.endOffset);
-      caretOffset = preCaretRange.toString().length;
+      return preCaretRange.toString();
     }
   } else if ( (sel = doc.selection) && sel.type != "Control") {
     var textRange = sel.createRange();
     var preCaretTextRange = doc.body.createTextRange();
     preCaretTextRange.moveToElementText(element);
     preCaretTextRange.setEndPoint("EndToEnd", textRange);
-    caretOffset = preCaretTextRange.text.length;
+    return preCaretTextRange.text;
   }
-  return caretOffset;
+  return undefined;
 }
+
+function getCaretCharacterOffsetWithin(element){
+  var preText = getCaretPrecedingText(element);
+  if(preText !== undefined){
+    return preText.length;
+  }
+  return 0;
+}
+
+function getCaretLineNumber(element) {
+  var preText = getCaretPrecedingText(element);
+  if(preText !== undefined){
+    return preText.split('\n').length;
+  }
+  return 0;
+}
+
 
 // Credits to https://stackoverflow.com/questions/6249095/how-to-set-the-caret-cursor-position-in-a-contenteditable-element-div
 function createRange(node, chars, range) {
@@ -477,10 +495,36 @@ function setCurrentCursorPosition(element, chars) {
   }
 }
 
+function highlight(line){
+  if(isHighlighted(line)) return line;
+  return `<mark>${line}</mark>`;
+}
+
+function unhighlight(line){
+  return line.replaceAll("<mark>", "").replaceAll("</mark>", "");
+}
+
+function isHighlighted(line){
+  return line.includes("<mark>");
+}
+
+function isHighlightedLine(lineno){
+  return highlightedLine == lineno;
+}
+
 function onCodeTextKey(event) {
   if (event.keyCode == 13) {
     // Capture "Enter" to insert spaces similar to the previous line.
     let pos = getCaretCharacterOffsetWithin(codetext);
+    let lineno = getCaretLineNumber(codetext);
+
+    if(isHighlightedLine(lineno)){
+      let lines = codetext.innerHTML.split('\n');
+      // remove highlight from the "broken" line
+      // which is one smaller then lineno since we added the newline
+      lines[lineno-1]=unhighlight(lines[lineno-1]);
+      codetext.innerHTML = lines.join("\n")
+    }
 
     let prevNewlinePos = pos - 1;
     while (prevNewlinePos > 0 &&
@@ -508,7 +552,7 @@ function onCodeTextKey(event) {
 
 function runProg(progText, maxSteps) {
   // we need to clean progText and remove the highlighting
-  progText = progText.replaceAll("<mark>", "").replaceAll("</mark>", "");
+  progText = unhighlight(progText);
   let p = new js8080sim.Parser();
   let asm = new js8080sim.Assembler();
   let sourceLines = p.parse(progText);
