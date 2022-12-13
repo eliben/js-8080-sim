@@ -523,7 +523,7 @@ function onCodeTextKey(event) {
       // remove highlight from the "broken" line
       // which is one smaller then lineno since we added the newline
       lines[lineno-1]=unhighlight(lines[lineno-1]);
-      codetext.innerHTML = lines.join("\n")
+      codetext.innerHTML = lines.join("\n");
     }
 
     let prevNewlinePos = pos - 1;
