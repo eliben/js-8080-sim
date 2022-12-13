@@ -1,2 +1,4 @@
 node_modules
 js8080simBundle.js
+.fleet/
+.idea/
