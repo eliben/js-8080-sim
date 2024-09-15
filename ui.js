@@ -12,6 +12,17 @@ const maxsteps = document.querySelector('#maxsteps');
 const ramstart = document.querySelector('#ramstart');
 const ramshowmode = document.querySelector('#ramshowmode');
 codetext.addEventListener('keydown', onCodeTextKey);
+// Paste as plain text (from https://stackoverflow.com/questions/12027137/javascript-trick-for-paste-as-plain-text-in-execcommand) 
+codetext.addEventListener("paste", function(e) {
+  // cancel paste
+  e.preventDefault();
+
+  // get text representation of clipboard
+  var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+
+  // insert text manually
+  document.execCommand("insertHTML", false, text);
+});
 document.querySelector("#run").addEventListener("mousedown", () => dispatchStep("run"));
 document.querySelector("#prev").addEventListener("mousedown", () => dispatchStep("prev"));
 document.querySelector("#next").addEventListener("mousedown", () => dispatchStep("next"));
@@ -232,7 +243,7 @@ function loadUiState() {
   ramstart.value = "0000";
 
   if (state) {
-    codetext.value = state.codetext;
+    codetext.innerHTML = state.codetext;
     if (state.maxsteps !== undefined) {
       maxsteps.value = state.maxsteps;
     }
@@ -246,7 +257,7 @@ function loadUiState() {
 
 function saveUiState() {
   let state = {
-    'codetext': codetext.value,
+    'codetext': codetext.innerHTML,
     'maxsteps': maxsteps.value
   };
   localStorage.setItem(STORAGE_ID, JSON.stringify(state));
@@ -272,6 +283,8 @@ function setStatusReady() {
 // Saves the mem values from the last run, so we could show different parts of
 // RAM per the user's request in the RAM table.
 let memFromLastRun = new Array(65536).fill(0);
+var globAddrToLine;
+var highlightedLine = -1;
 
 // Checks if the value in the maxsteps box is valid; throws exception if not.
 function checkSteps() {
@@ -310,22 +323,47 @@ function onNextStep() {
   let step = parseInt(maxsteps.value);
   maxsteps.value = step + 1;
   onRunCode();
+  highlightCurrentLine();
 }
 
 function onPrevStep() {
   let step = parseInt(maxsteps.value);
   maxsteps.value = step - 1;
   onRunCode();
+  highlightCurrentLine();
+}
+
+function highlightCurrentLine() {
+  let pc = parseInt(cpuStateValues.pc.textContent, 16);
+  let lineno = globAddrToLine[pc];
+  //console.log(`Highlighting ${pc} => ${lineno}`);
+  let lines = codetext.innerHTML.split('\n');
+
+  // map the entries to a div to enable styling and track the index if the line contains FAIL
+  lines = lines.map((line, index) => {
+    index += 1;
+    if(index == lineno && !isHighlighted(line)){
+      highlightedLine = lineno;
+      return highlight(line, lineno);
+    } else if(isHighlighted(line)) {
+      return unhighlight(line);
+    } else {
+      return line;
+    }
+  });
+
+  // put the mapped content back as innerHTML of the PRE element
+  codetext.innerHTML = lines.join("\n");
 }
 
 function onRunCode() {
   saveUiState();
 
-  let prog = codetext.value;
+  let prog = codetext.innerHTML;
 
-  let [state, mem, labelToAddr] = runProg(prog, parseInt(maxsteps.value));
+  let [state, mem, labelToAddr, addrToLine] = runProg(prog, parseInt(maxsteps.value));
   memFromLastRun = mem;
-
+  globAddrToLine = addrToLine;
   // Populate CPU state / registers.
   for (let regName of Object.keys(state)) {
     if (cpuStateValues.hasOwnProperty(regName)) {
@@ -370,40 +408,155 @@ function onRamStartKey(event) {
   }
 }
 
+// Credits to https://stackoverflow.com/questions/4811822/get-a-ranges-start-and-end-offsets-relative-to-its-parent-container/4812022#4812022
+function getCaretPrecedingText(element) {
+  var doc = element.ownerDocument || element.document;
+  var win = doc.defaultView || doc.parentWindow;
+  var sel;
+  if (typeof win.getSelection != "undefined") {
+    sel = win.getSelection();
+    if (sel.rangeCount > 0) {
+      var range = win.getSelection().getRangeAt(0);
+      var preCaretRange = range.cloneRange();
+      preCaretRange.selectNodeContents(element);
+      preCaretRange.setEnd(range.endContainer, range.endOffset);
+      return preCaretRange.toString();
+    }
+  } else if ( (sel = doc.selection) && sel.type != "Control") {
+    var textRange = sel.createRange();
+    var preCaretTextRange = doc.body.createTextRange();
+    preCaretTextRange.moveToElementText(element);
+    preCaretTextRange.setEndPoint("EndToEnd", textRange);
+    return preCaretTextRange.text;
+  }
+  return undefined;
+}
+
+function getCaretCharacterOffsetWithin(element){
+  var preText = getCaretPrecedingText(element);
+  if(preText !== undefined){
+    return preText.length;
+  }
+  return 0;
+}
+
+function getCaretLineNumber(element) {
+  var preText = getCaretPrecedingText(element);
+  if(preText !== undefined){
+    return preText.split('\n').length;
+  }
+  return 0;
+}
+
+
+// Credits to https://stackoverflow.com/questions/6249095/how-to-set-the-caret-cursor-position-in-a-contenteditable-element-div
+function createRange(node, chars, range) {
+  if (!range) {
+    range = document.createRange();
+    range.selectNode(node);
+    range.setStart(node, 0);
+  }
+
+  if (chars.count === 0) {
+    range.setEnd(node, chars.count);
+  } else if (node && chars.count >0) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      if (node.textContent.length < chars.count) {
+        chars.count -= node.textContent.length;
+      } else {
+        range.setEnd(node, chars.count);
+        chars.count = 0;
+      }
+    } else {
+      for (var lp = 0; lp < node.childNodes.length; lp++) {
+        range = createRange(node.childNodes[lp], chars, range);
+
+        if (chars.count === 0) {
+          break;
+        }
+      }
+    }
+  }
+
+  return range;
+}
+
+function setCurrentCursorPosition(element, chars) {
+  if (chars >= 0) {
+    var selection = window.getSelection();
+
+    var range = createRange(element, { count: chars });
+
+    if (range) {
+      range.collapse(false);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  }
+}
+
+function highlight(line){
+  if(isHighlighted(line)) return line;
+  return `<mark>${line}</mark>`;
+}
+
+function unhighlight(line){
+  return line.replaceAll("<mark>", "").replaceAll("</mark>", "");
+}
+
+function isHighlighted(line){
+  return line.includes("<mark>");
+}
+
+function isHighlightedLine(lineno){
+  return highlightedLine == lineno;
+}
+
 function onCodeTextKey(event) {
   if (event.keyCode == 13) {
     // Capture "Enter" to insert spaces similar to the previous line.
-    let pos = codetext.selectionStart;
+    let pos = getCaretCharacterOffsetWithin(codetext);
+    let lineno = getCaretLineNumber(codetext);
+
+    if(isHighlightedLine(lineno)){
+      let lines = codetext.innerHTML.split('\n');
+      // remove highlight from the "broken" line
+      // which is one smaller then lineno since we added the newline
+      lines[lineno-1]=unhighlight(lines[lineno-1]);
+      codetext.innerHTML = lines.join("\n");
+    }
 
     let prevNewlinePos = pos - 1;
     while (prevNewlinePos > 0 &&
-           codetext.value.charAt(prevNewlinePos) !== '\n') {
+           codetext.innerHTML.charAt(prevNewlinePos) !== '\n') {
       prevNewlinePos--;
     }
 
     let startLinePos = prevNewlinePos + 1;
-    while (codetext.value.charAt(startLinePos) === ' ') {
+    while (codetext.innerHTML.charAt(startLinePos) === ' ') {
       startLinePos++;
     }
 
     let numSpaces = startLinePos - prevNewlinePos - 1;
 
-    codetext.value = codetext.value.substring(0, pos) +
+    codetext.innerHTML = codetext.innerHTML.substring(0, pos) +
                       '\n' +
                       ' '.repeat(numSpaces) +
-                      codetext.value.substring(pos, codetext.value.length);
-    codetext.selectionStart = pos + numSpaces + 1;
-    codetext.selectionEnd = pos + numSpaces + 1;
+                      codetext.innerHTML.substring(pos, codetext.innerHTML.length);
+    setCurrentCursorPosition(codetext, pos + numSpaces + 1);
     event.stopPropagation();
     event.preventDefault();
   }
 }
 
+
 function runProg(progText, maxSteps) {
+  // we need to clean progText and remove the highlighting
+  progText = unhighlight(progText);
   let p = new js8080sim.Parser();
   let asm = new js8080sim.Assembler();
   let sourceLines = p.parse(progText);
-  let [mem, labelToAddr] = asm.assemble(sourceLines);
+  let [mem, labelToAddr, addrToLine] = asm.assemble(sourceLines);
 
   const memoryTo = (addr, value) => {mem[addr] = value;};
   const memoryAt = (addr) => {return mem[addr];};
@@ -422,13 +575,14 @@ function runProg(progText, maxSteps) {
     }
   }
 
-  return [js8080sim.CPU8080.status(), mem, labelToAddr];
+  return [js8080sim.CPU8080.status(), mem, labelToAddr, addrToLine];
 }
 
 function onSetSample() {
   let samples = document.querySelector("#samples");
   let selectedSampleCode = codeSamples[samples.selectedIndex];
-  codetext.value = selectedSampleCode.code.replace(/^\n+/, '');
+  codetext.innerHTML = selectedSampleCode.code.replace(/^\n+/, '');
+  codetext.innerHTML = selectedSampleCode.code.replace(/^\n+/, '');
 }
 
 function onShowRamStart() {
